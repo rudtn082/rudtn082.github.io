@@ -1,0 +1,627 @@
+
+
+<!DOCTYPE html>
+<html lang="ko" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/fluid.png">
+  <link rel="icon" href="/img/fluid.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="kxxxgs">
+  <meta name="keywords" content="">
+  
+    <meta name="description" content="[인사이드 안드로이드]Chapter6 - 안드로이드 서비스 개요예제 프로그램 : 안드로이드 서비스 동작 이해안드로이드에서 서비스는 UI 없이 주기적으로 특정한 일을 수행하는 백그라운드 프로세스를 가리킨다. 따라서 안드로이드 프로그램을 작성할 때 개발자가 적절한 애플리케이션 서비스를 직접 구현해서 적용한다면 더 반응성이 좋은 애플리케이션을 개발할 수 있다.">
+<meta property="og:type" content="article">
+<meta property="og:title" content="[인사이드 안드로이드] 챕터 6 - 안드로이드 서비스 개요">
+<meta property="og:url" content="http://kxxxgs.github.io/chapter6/index.html">
+<meta property="og:site_name" content="kxxxgs">
+<meta property="og:description" content="[인사이드 안드로이드]Chapter6 - 안드로이드 서비스 개요예제 프로그램 : 안드로이드 서비스 동작 이해안드로이드에서 서비스는 UI 없이 주기적으로 특정한 일을 수행하는 백그라운드 프로세스를 가리킨다. 따라서 안드로이드 프로그램을 작성할 때 개발자가 적절한 애플리케이션 서비스를 직접 구현해서 적용한다면 더 반응성이 좋은 애플리케이션을 개발할 수 있다.">
+<meta property="og:locale" content="ko_KR">
+<meta property="og:image" content="http://kxxxgs.github.io/images/post/service1.png">
+<meta property="og:image" content="http://kxxxgs.github.io/images/post/service2.png">
+<meta property="og:image" content="http://kxxxgs.github.io/images/post/service3.png">
+<meta property="article:published_time" content="2019-05-05T15:00:00.000Z">
+<meta property="article:modified_time" content="2023-07-06T15:46:05.755Z">
+<meta property="article:author" content="kxxxgs">
+<meta property="article:tag" content="Android">
+<meta property="article:tag" content="인사이드 안드로이드">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="http://kxxxgs.github.io/images/post/service1.png">
+  
+  
+  
+  <title>[인사이드 안드로이드] 챕터 6 - 안드로이드 서비스 개요 - kxxxgs</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1749284_hj8rtnfg7um.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_lbnruvf0jn.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"kxxxgs.github.io","root":"/","version":"1.9.5","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":false},"image_zoom":{"enable":false,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":{"measurement_id":null},"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false}},"search_path":"/local-search.xml","include_content_in_search":true};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+  
+
+
+  
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>Kxxxgs</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/">
+                <i class="iconfont icon-home-fill"></i>
+                <span>Home</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/">
+                <i class="iconfont icon-category-fill"></i>
+                <span>Categories</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/">
+                <i class="iconfont icon-user-fill"></i>
+                <span>About</span>
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              <i class="iconfont icon-search"></i>
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">
+              <i class="iconfont icon-dark" id="color-toggle-icon"></i>
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/img/default.png') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="[인사이드 안드로이드] 챕터 6 - 안드로이드 서비스 개요"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2019-05-06 00:00" pubdate>
+          2019년 5월 6일 오전
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          7.7k words
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          65 mins
+        
+      </span>
+    
+
+    
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <h1 id="seo-header">[인사이드 안드로이드] 챕터 6 - 안드로이드 서비스 개요</h1>
+            
+            
+              <div class="markdown-body">
+                
+                <h1 id="인사이드-안드로이드"><a href="#인사이드-안드로이드" class="headerlink" title="[인사이드 안드로이드]"></a>[인사이드 안드로이드]</h1><h2 id="Chapter6-안드로이드-서비스-개요"><a href="#Chapter6-안드로이드-서비스-개요" class="headerlink" title="Chapter6 - 안드로이드 서비스 개요"></a>Chapter6 - 안드로이드 서비스 개요</h2><h3 id="예제-프로그램-안드로이드-서비스-동작-이해"><a href="#예제-프로그램-안드로이드-서비스-동작-이해" class="headerlink" title="예제 프로그램 : 안드로이드 서비스 동작 이해"></a>예제 프로그램 : 안드로이드 서비스 동작 이해</h3><p>안드로이드에서 서비스는 UI 없이 주기적으로 특정한 일을 수행하는 백그라운드 프로세스를 가리킨다. 따라서 안드로이드 프로그램을 작성할 때 개발자가 적절한 애플리케이션 서비스를 직접 구현해서 적용한다면 더 반응성이 좋은 애플리케이션을 개발할 수 있다.  </p>
+<p>간단한 예제를 통해 안드로이드 서비스의 동작 방식을 알아보기 위해 ApiDemo 샘플 예제의 Alarm Service 코드를 본다.  </p>
+<p>이 프로그램은 크게 메인 액티비티와 두개의 시스템 서비스, AlarmService_Service라는 애플리케이션 서비스로 구성돼 있다.<br>(1) 메인 액티비티 상에서 Start 버튼을 누르면 시스템 서비스인 Alarm Service에 30초마다 사용자가 작성한 애플리케이션 서비스인 AlarmService_Service를 실행해 달라고 요청한다.<br>(2) Alarm Service는 사용자의 요청에 따라 30초마다 AlarmService_Service라는 애플리케이션 서비스를 실행한다.  </p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">private</span> <span class="hljs-type">OnClickListener</span> <span class="hljs-variable">mStartAlarmListener</span> <span class="hljs-operator">=</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">OnClickListener</span>() &#123;<br>    <span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">onClick</span><span class="hljs-params">(View v)</span> &#123;<br>        <span class="hljs-type">long</span> <span class="hljs-variable">firstTime</span> <span class="hljs-operator">=</span> SystemClock.elapsedRealtime();<br><br>        <span class="hljs-type">AlarmManager</span> <span class="hljs-variable">am</span> <span class="hljs-operator">=</span> (AlarmManager)getSystemService(ALARM_SERVICE);<br>        am.setRepeating(AlarmManager.ELAPSED_REALTIME_WAKEUP,<br>                        firstTime, <span class="hljs-number">30</span>*<span class="hljs-number">1000</span>, mAlarmSender); <span class="hljs-comment">// (1, 2)</span><br>    &#125;<br>&#125;;<br></code></pre></td></tr></table></figure>
+
+
+<p>(3) AlarmService_Service는 실행되자마자 시스템 서비스인 Notification Service에 AlarmService_Service 서비스가 시작됐음을 알리는 문자열 출력을 요청한다.<br>(4) Notification Service는 AlarmService_Service에게서 전달받은 문자열을 화면 상단의 상태 표시줄에 출력한다.  </p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">onCreate</span><span class="hljs-params">()</span> &#123;<br>    <span class="hljs-type">NotificationManager</span> <span class="hljs-variable">mNM</span> <span class="hljs-operator">=</span> (NotificationManager)getSystemService(NOTIFICATION_SERVICE);<br><br>    showNotification(); <span class="hljs-comment">// (3, 4)</span><br><br>    <span class="hljs-type">Thread</span> <span class="hljs-variable">thr</span> <span class="hljs-operator">=</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">Thread</span>(<span class="hljs-literal">null</span>, mTask, <span class="hljs-string">&quot;AlarmService_Service&quot;</span>);<br>    thr.start();<br>&#125;<br></code></pre></td></tr></table></figure>
+
+
+<p>(5) AlarmService_Service는 시작된 후 15초 후에 종료되며, 종료된 사실을 메인 액티비티에 알리기 위해 토스트(Toast) 메시지를 출력한다.  </p>
+<figure class="highlight reasonml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><code class="hljs reasonml">Runnable mTask = <span class="hljs-keyword">new</span> <span class="hljs-constructor">Runnable()</span> &#123; <span class="hljs-comment">// (5)</span><br>    public void run<span class="hljs-literal">()</span> &#123;<br>        long endTime = <span class="hljs-module-access"><span class="hljs-module"><span class="hljs-identifier">System</span>.</span></span>current<span class="hljs-constructor">TimeMillis()</span> + <span class="hljs-number">15</span>*<span class="hljs-number">1000</span>;<br>        <span class="hljs-keyword">while</span> (<span class="hljs-module-access"><span class="hljs-module"><span class="hljs-identifier">System</span>.</span></span>current<span class="hljs-constructor">TimeMillis()</span> &lt; endTime) &#123;<br>            synchronized (mBinder) &#123;<br>                <span class="hljs-keyword">try</span> &#123;<br>                    mBinder.wait(endTime - <span class="hljs-module-access"><span class="hljs-module"><span class="hljs-identifier">System</span>.</span></span>current<span class="hljs-constructor">TimeMillis()</span>);<br>                &#125; catch (Exception e) &#123;<br>                &#125;<br>            &#125;<br>        &#125;<br><br>        <span class="hljs-module-access"><span class="hljs-module"><span class="hljs-identifier">AlarmService_Service</span>.</span></span>this.stop<span class="hljs-constructor">Self()</span>;<br>    &#125;<br>&#125;;<br><br><br>public void on<span class="hljs-constructor">Destroy()</span> &#123;<br>    mNM.cancel(<span class="hljs-module-access"><span class="hljs-module"><span class="hljs-identifier">R</span>.</span></span><span class="hljs-built_in">string</span>.alarm_service_started);<br><br>    <span class="hljs-module-access"><span class="hljs-module"><span class="hljs-identifier">Toast</span>.</span></span>make<span class="hljs-constructor">Text(<span class="hljs-params">this</span>, R.<span class="hljs-params">string</span>.<span class="hljs-params">alarm_service_finished</span>, Toast.LENGTH_SHORT)</span>.show<span class="hljs-literal">()</span>;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+
+<h3 id="안드로이드-서비스-분류"><a href="#안드로이드-서비스-분류" class="headerlink" title="안드로이드 서비스 분류"></a>안드로이드 서비스 분류</h3><p>안드로이드 서비스는 다음과 같이 크게 프레임워크에서 기본적으로 제공하는 <strong>시스템 서비스</strong>와 애플리케이션 개발자가 Service 클래스를 상속해서 구현한 <strong>애플리케이션 서비스</strong>로 구분할 수 있다.  </p>
+<p><img src="/images/post/service1.png" srcset="/img/loading.gif" lazyload alt="service1" title="service1">  </p>
+<h3 id="안드로이드-애플리케이션-서비스"><a href="#안드로이드-애플리케이션-서비스" class="headerlink" title="안드로이드 애플리케이션 서비스"></a>안드로이드 애플리케이션 서비스</h3><p>애플리케이션 서비스는 안드로이드 SDK의 Service 클래스를 확장한 클래스의 인스턴스로 UI 없이 주기적으로 특정한 일을 수행하는 백그라운드 프로세스를 가리킨다.</p>
+<p>애플리케이션 개발자는 서비스를 두 가지 방법으로 이용할 수 있다.  </p>
+<ul>
+<li>서비스 시작, 종료  </li>
+<li>바인딩을 통한 서비스 원격 제어(서비스를 원격 제어할 수 있게 서비스에 연결하는 것)</li>
+</ul>
+<p>애플리케이션이 서비스를 생성하려면 startService(), bindService()같은 API를 상황에 맞게 이용하면 된다. 백그라운드에서 특정 동작을 하는 서비스를 실행할 때는 <strong>startService()</strong>, 서비스에 바인딩해서 서비스가 제공하는 인터페이스를 통해 서비스를 제어하고 싶다면 **bindService()**를 통해 서비스를 생성한다. 두 서비스의 생명 주기는 약간 다른 것을 확인할 수 있다.  </p>
+<p><img src="/images/post/service2.png" srcset="/img/loading.gif" lazyload alt="service2" title="service2">  </p>
+<p>startService()나 bindService()로 시작된 서비스 모두 onCreate()와 onDestroy() 콜백 메서드가 호출된다. onCreate() 메서드는 서비스가 처음 생성될 때 호출되며 일반적으로 서비스를 초기화하는 코드가 포함된다. onDestroy()는 서비스가 종료되기 직전에 호출되는데, 이때 서비스가 사용한 리소스를 모두 해제해야 한다.  </p>
+<h5 id="startService"><a href="#startService" class="headerlink" title="startService()"></a>startService()</h5><p>onStartCommand()는 그림에서 볼 수 있듯이 오직 startService()에 의해 시작된 서비스에서 onCreate() 메서드 다음으로 호출된다. startService() 메서드의 첫 번째 인자로 넘어온 인텐트가 onStartCommand()의 첫 번째 인자로 그대로 전달되는데, 이때 인텐트에는 주로 실행할 서비스에 대한 정보가 포함된다. 이후 onStartCommand()에서는 일반적으로 인텐트에서 넘어온 인자가 있다면 이를 처리하거나 실질적인 백그라운드 작업을 처리하는 스레드를 실행한다.  </p>
+<h5 id="bindService"><a href="#bindService" class="headerlink" title="bindService()"></a>bindService()</h5><p>bindService()에 의해 시작된 서비스에서 onBind()는 클라이언트가 서비스에 바인딩하려고 할 떄 호출된다.(아직 서비스가 생성되지 않았다면 그 전에 onCreate()를 먼저 호출한다) 서비스의 onBind() 콜백에서는 바인딩할 클라이언트를 위해 해당 서비스와 연결 가능한 객체를 제공한다. 따라서 바인딩이 끝나면 클라이언트는 이 객체를 통해 서비스를 원격 제어할 수 있다.  </p>
+<h4 id="애플리케이션-서비스의-분류"><a href="#애플리케이션-서비스의-분류" class="headerlink" title="애플리케이션 서비스의 분류"></a>애플리케이션 서비스의 분류</h4><p>애플리케이션 서비스를 로컬 서비스와 리모트 서비스로 구분한다. 이를 구분하는 기준은 서비스와 이를 생선한 서비스 클라이언트(보통 액티비티)가 동일한 프로세스에서 동작하고 있는지 여부다.  </p>
+<p><img src="/images/post/service3.png" srcset="/img/loading.gif" lazyload alt="service3" title="service3">  </p>
+<p>위의 그림과 같이 생성된 서비스가 자신과 동일한 프로세스에서 실행되는 경우 <strong>로컬 서비스</strong>라 부른다. 로컬 서비스는 자신을 생성한 애플리케이션 내에서만 사용될 수 있으며 애플리케이션이 종료하면 함께 종료한다.<br><strong>리모트 서비스</strong>는 자신을 생성한 액티비티와는 별개의 독립적인 프로세스 위에서 동작하기 때문에 메인 애플리케이션이 종료하더라도 계속 동작한다. **잘못 구현된 리모트 서비스는 프로그램이 종료하더라도 시스템 자원(배터리 등)을 비효율적으로 소모할 수 있기 때문에 설계에 신중을 기해야 한다.  </p>
+<p>로컬 서비스와 리모트 서비스와의 가장 큰 차이는 서비스 제어를 위한 바인딩 방법이다.<br>로컬 서비스의 경우는 서비스와 서비스를 이용하는 클라이언트 프로그램이 동일 프로세스에서 동작하기 때문에 로컬 서비스 바인딩은 클라이언트 프로그램이 로컬 서비스의 레퍼런스만 얻으면 된다.<br>리모트 서비스의 경우는 액티비티와 자신이 모두 별개의 프로세스에서 동작하므로 (다음 장에서 배울)IPC 메커니즘을 이용해야 한다.  </p>
+<p>로컬 서비스와 리모트 서비스의 바인딩 과정이 어떻게 다른지를 예제를 분석하며 알아보겠다.  </p>
+<h5 id="로컬-서비스"><a href="#로컬-서비스" class="headerlink" title="로컬 서비스"></a>로컬 서비스</h5><p>Local Service Binding 예제는 크게 서비스를 나타내는 LocalService.java와 서비스를 이용하는 액티비티인 LocalServiceActivities.java로 구성돼 있다.<br>Bind Service 버튼을 누르면 doBindService()가 호출된다.  </p>
+<figure class="highlight reasonml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs reasonml"><span class="hljs-keyword">private</span> OnClickListener mBindListener = <span class="hljs-keyword">new</span> <span class="hljs-constructor">OnClickListener()</span> &#123;<br>    public void on<span class="hljs-constructor">Click(View <span class="hljs-params">v</span>)</span> &#123;<br>        <span class="hljs-keyword">do</span><span class="hljs-constructor">BindService()</span>;<br>    &#125;<br>&#125;;<br></code></pre></td></tr></table></figure>
+
+<p>이 메서드에서 내부적으로 bindService() API를 사용해서 LocalService 바인딩을 시도한다.<br><em>bindService(LocalService 실행하기 위한 인텐트, 서비스와의 바인딩 연결을 처리할 객체, 바인딩할 서비스가 없는 경우 자동 서비스 생성 플래그)</em>  </p>
+<figure class="highlight reasonml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><code class="hljs reasonml">void <span class="hljs-keyword">do</span><span class="hljs-constructor">BindService()</span> &#123;<br>    <span class="hljs-keyword">if</span> (bind<span class="hljs-constructor">Service(<span class="hljs-params">new</span> Intent(Binding.<span class="hljs-params">this</span>, LocalService.<span class="hljs-params">class</span>)</span>,<br>        mConnection, Context.BIND_AUTO_CREATE)) &#123;<br>        mShouldUnbind = <span class="hljs-literal">true</span>;<br>    &#125; <span class="hljs-keyword">else</span> &#123;<br>        <span class="hljs-module-access"><span class="hljs-module"><span class="hljs-identifier">Log</span>.</span></span>e(<span class="hljs-string">&quot;MY_APP_TAG&quot;</span>, <span class="hljs-string">&quot;Error: The requested service doesn&#x27;t &quot;</span> +<br>                <span class="hljs-string">&quot;exist, or this client isn&#x27;t allowed access to it.&quot;</span>);<br>    &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>바인딩할 서비스가 생성됐으므로 안드로이드는 바인딩 처리를 위해 서비스의 onBind() 콜백 메서드를 호출한다.<br>onBind 메서드는 액티비티가 LocalService 자신과 연결할 수 있게 LocalBinder 객체를 반환한다.  </p>
+<figure class="highlight scala"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><code class="hljs scala">public <span class="hljs-type">IBinder</span> onBind(<span class="hljs-type">Intent</span> intent) &#123;<br>    <span class="hljs-keyword">return</span> mBinder;<br>&#125;<br><br><span class="hljs-keyword">private</span> <span class="hljs-keyword">final</span> <span class="hljs-type">IBinder</span> mBinder = <span class="hljs-keyword">new</span> <span class="hljs-type">LocalBinder</span>();<br><br>public <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">LocalBinder</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">Binder</span> </span>&#123;<br>    <span class="hljs-type">LocalService</span> getService() &#123;<br>        <span class="hljs-keyword">return</span> <span class="hljs-type">LocalService</span>.<span class="hljs-keyword">this</span>;<br>    &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>바인딩을 처리할 객체를 제대로 생성했다면(LocalBinder), 안드로이드 프레임워크는 서비스 클라이언트 측 메서드를 호출한다.<br>이 때 LocalBinder 객체의 getService() 메서드를 호출해서 바인딩하려고 했던 LocalService 객체의 레퍼런스 값을 구한다.<br>이렇게 구한 LocalBinder 객체의 레퍼런스 값을 mBoundService 멤버 필드에 저장하면 서비스 바인딩이 마무리된다.  </p>
+<figure class="highlight csharp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><code class="hljs csharp"><span class="hljs-keyword">private</span> ServiceConnection mConnection = <span class="hljs-keyword">new</span> ServiceConnection() &#123;<br>    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">onServiceConnected</span>(<span class="hljs-params">ComponentName className, IBinder service</span>)</span> &#123;<br>        mBoundService = ((LocalService.LocalBinder)service).getService();<br>        Toast.makeText(Binding.<span class="hljs-keyword">this</span>, R.<span class="hljs-built_in">string</span>.local_service_connected,<br>            Toast.LENGTH_SHORT).show();<br>    &#125;<br><br>    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">onServiceDisconnected</span>(<span class="hljs-params">ComponentName className</span>)</span> &#123;<br>        mBoundService = <span class="hljs-literal">null</span>;<br>        Toast.makeText(Binding.<span class="hljs-keyword">this</span>, R.<span class="hljs-built_in">string</span>.local_service_disconnected,<br>            Toast.LENGTH_SHORT).show();<br>    &#125;<br>&#125;;<br></code></pre></td></tr></table></figure>
+
+<p>서비스가 바인딩 되고 나면 액티비티는 해당 서비스가 가진 모든 메서드와 멤버 필드 값을 mBoundService 멤버 필드를 통해 접근할 수 있게 된다.  </p>
+<h5 id="리모트-서비스"><a href="#리모트-서비스" class="headerlink" title="리모트 서비스"></a>리모트 서비스</h5><p>Remote Service Binding 예제는 Local Service Binding 과는 다르게 액티비티나 서비스 파일 이외에 ISecondary.aidl이라는 AIDL 파일과 이 파일에 의해 자동 생성된 ISecondary.java 파일이 추가된 것을 알 수 있다.  </p>
+<p><em>ISecondary.aidl은 액티비티와 서비스의 통신을 위한 인터페이스 정의</em><br><em>ISecondary.java는 안드로이드가 자동 생성하며 인터페이스를 기반으로 액티비티와 서비스가 서로 통신할 수 있게 마샬링&#x2F;언마샬링을 수행</em><br><em>마샬링 - 객체의 메모리 구조를 저장이나 전송을 위해서 적당한 자료형태로 변형</em>  </p>
+<p>ISecondary.aidl을 통해 자동으로 생성된 ISecondary.java는 서비스 클라이언트와 리모트 서비스 간의 ISecondary 인터페이스에 기반한 바인더 IPC 연결을 설정한다. 즉, 이 코드를 통해서 RemoteServiceBinding 액티비티는 RemoteService 서비스가 제공하는 ISecondary 인터페이스에 포함된 getPid() 메서드를 마치 해당 클래스에 포함된 매서드를 호출하듯 호출할 수 있다.  </p>
+<p>Bind Service 버튼을 눌렀을 때 로컬 서비스와 비슷하게 bindService()에서 첫 번째 인자에 리모트 서비스를 실행하기 위한 인텐트가 전달된다.  </p>
+<figure class="highlight reasonml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs reasonml"><span class="hljs-keyword">private</span> OnClickListener mBindListener = <span class="hljs-keyword">new</span> <span class="hljs-constructor">OnClickListener()</span> &#123;<br>    public void on<span class="hljs-constructor">Click(View <span class="hljs-params">v</span>)</span> &#123;<br>        Intent intent = <span class="hljs-keyword">new</span> <span class="hljs-constructor">Intent(Binding.<span class="hljs-params">this</span>, RemoteService.<span class="hljs-params">class</span>)</span>;<br>        intent.set<span class="hljs-constructor">Action(ISecondary.<span class="hljs-params">class</span>.<span class="hljs-params">getName</span>()</span>);<br>        bind<span class="hljs-constructor">Service(<span class="hljs-params">intent</span>, <span class="hljs-params">mSecondaryConnection</span>, Context.BIND_AUTO_CREATE)</span>;<br>    &#125;<br>&#125;;<br></code></pre></td></tr></table></figure>
+
+<p>서비스가 생성되고 나면 서비스 생명주기에 따라 onCreate() 메서드와 onBind() 메서드가 차례대로 호출된다. onCreate() 메서드는 앞의 LocalService와 같이 서비스의 생성을 알림 메시지를 통해 알린다. onBind() 메서드의 주된 역할은 바인더 IPC를 처리할 서비스 바인더 객체(여기서는 mSecondaryBinder)를 생성한 후 이를 시스템에 반환하는 것이다.  </p>
+<figure class="highlight csharp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><code class="hljs csharp"><span class="hljs-keyword">private</span> final ISecondary.Stub mSecondaryBinder = <span class="hljs-keyword">new</span> ISecondary.Stub() &#123;<br>    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-built_in">int</span> <span class="hljs-title">getPid</span>()</span> &#123;<br>        <span class="hljs-keyword">return</span> Process.myPid();<br>    &#125;<br>    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">basicTypes</span>(<span class="hljs-params"><span class="hljs-built_in">int</span> anInt, <span class="hljs-built_in">long</span> aLong, boolean aBoolean,</span></span><br><span class="hljs-params"><span class="hljs-function">        <span class="hljs-built_in">float</span> aFloat, <span class="hljs-built_in">double</span> aDouble, String aString</span>)</span> &#123;<br>    &#125;<br>&#125;;<br><br><span class="hljs-function"><span class="hljs-keyword">public</span> IBinder <span class="hljs-title">onBind</span>(<span class="hljs-params">Intent intent</span>)</span> &#123;<br>    <span class="hljs-keyword">if</span> (IRemoteService.<span class="hljs-keyword">class</span>.getName().<span class="hljs-keyword">equals</span>(intent.getAction())) &#123;<br>        <span class="hljs-keyword">return</span> mBinder;<br>    &#125;<br>    <span class="hljs-keyword">if</span> (ISecondary.<span class="hljs-keyword">class</span>.getName().<span class="hljs-keyword">equals</span>(intent.getAction())) &#123;<br>        <span class="hljs-keyword">return</span> mSecondaryBinder;<br>    &#125;<br>    <span class="hljs-keyword">return</span> <span class="hljs-literal">null</span>;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>바인딩 준비가 끝나면 안드로이드 프레임워크는 bindService()의 두 번째 인자로 넘긴 연결 객체의 onServiceConnected()콜백 메서드를 호출한다.<br>바인딩이 끝나면 mSecondaryService 멤버 변수에 저장된 서비스 프록시 객체를 통해 RemoteService 서비스의 getPid() 메서드를 마치 자신의 메서드인 것처럼 호출할 수 있게 된다.  </p>
+<figure class="highlight reasonml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><code class="hljs reasonml"><span class="hljs-keyword">private</span> ServiceConnection mSecondaryConnection = <span class="hljs-keyword">new</span> <span class="hljs-constructor">ServiceConnection()</span> &#123;<br>    public void on<span class="hljs-constructor">ServiceConnected(ComponentName <span class="hljs-params">className</span>, IBinder <span class="hljs-params">service</span>)</span> &#123;<br>        mSecondaryService = <span class="hljs-module-access"><span class="hljs-module"><span class="hljs-identifier">ISecondary</span>.</span><span class="hljs-module"><span class="hljs-identifier">Stub</span>.</span></span><span class="hljs-keyword">as</span><span class="hljs-constructor">Interface(<span class="hljs-params">service</span>)</span>; <span class="hljs-comment">// 서비스 프록시 객체가 생성되어 저장</span><br>        mKillButton.set<span class="hljs-constructor">Enabled(<span class="hljs-params">true</span>)</span>;<br>    &#125;<br>    public void on<span class="hljs-constructor">ServiceDisconnected(ComponentName <span class="hljs-params">className</span>)</span> &#123;<br>        mSecondaryService = null;<br>        mKillButton.set<span class="hljs-constructor">Enabled(<span class="hljs-params">false</span>)</span>;<br>    &#125;<br>&#125;;<br></code></pre></td></tr></table></figure>
+
+<p>바인딩한 서비스를 이용하기 위해서 ‘Kill Process’버튼을 누르면 서비스 프록시 객체의 getPid() 서비스 프록시 메서드가 호출된다. 액티비티는 이렇게 구한 서비스 프로세스를 Process.killProcess() 메서드를 통해 강제 종료한다.  </p>
+<figure class="highlight csharp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><code class="hljs csharp"><span class="hljs-keyword">private</span> OnClickListener mKillListener = <span class="hljs-keyword">new</span> OnClickListener() &#123;<br>    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">onClick</span>(<span class="hljs-params">View v</span>)</span> &#123;<br>        <span class="hljs-keyword">if</span> (mSecondaryService != <span class="hljs-literal">null</span>) &#123;<br>            <span class="hljs-keyword">try</span> &#123;<br>                <span class="hljs-built_in">int</span> pid = mSecondaryService.getPid();<br>                Process.killProcess(pid);<br>                mCallbackText.setText(<span class="hljs-string">&quot;Killed service process.&quot;</span>);<br>            &#125; <span class="hljs-keyword">catch</span> (RemoteException ex) &#123;<br>                Toast.makeText(Binding.<span class="hljs-keyword">this</span>,<br>                        R.<span class="hljs-built_in">string</span>.remote_call_failed,<br>                        Toast.LENGTH_SHORT).show();<br>            &#125;<br>        &#125;<br>    &#125;<br>&#125;;<br></code></pre></td></tr></table></figure>
+
+                
+              </div>
+            
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+    <div class="post-meta mr-3 d-flex align-items-center">
+      <i class="iconfont icon-category"></i>
+      
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/categories/Android/" class="category-chain-item">Android</a>
+  
+  
+
+      </span>
+    
+  
+</span>
+
+    </div>
+  
+  
+    <div class="post-meta">
+      <i class="iconfont icon-tags"></i>
+      
+        <a href="/tags/Android/" class="print-no-link">#Android</a>
+      
+        <a href="/tags/%EC%9D%B8%EC%82%AC%EC%9D%B4%EB%93%9C-%EC%95%88%EB%93%9C%EB%A1%9C%EC%9D%B4%EB%93%9C/" class="print-no-link">#인사이드 안드로이드</a>
+      
+    </div>
+  
+</div>
+
+
+              
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/chapter6_2/" title="[인사이드 안드로이드] 챕터 6 - 안드로이드 서비스 개요(2)">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">[인사이드 안드로이드] 챕터 6 - 안드로이드 서비스 개요(2)</span>
+                        <span class="visible-mobile">Previous</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/chapter5/" title="[인사이드 안드로이드] 챕터 5 - Zygote">
+                        <span class="hidden-mobile">[인사이드 안드로이드] 챕터 5 - Zygote</span>
+                        <span class="visible-mobile">Next</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header">
+    <i class="iconfont icon-list"></i>
+    <span>Table of Contents</span>
+  </p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">검색</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">키워드</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <span>Kxxxgs</span> <i class="iconfont icon-love"></i> 
+    </div>
+  
+  
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.4/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.20.1/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    window.tocbot.init(Object.assign({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      scrollSmooth    : true,
+      includeTitleTags: true,
+      headingsOffset  : -boardTop,
+    }, CONFIG.toc));
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('tocbot' in window) {
+        tocbot.refresh();
+        var toc = jQuery('#toc');
+        if (toc.length === 0 || !tocbot) {
+          return;
+        }
+        if (toc.find('.toc-list-item').length > 0) {
+          toc.css('visibility', 'visible');
+        }
+      }
+    });
+  });
+</script>
+
+
+  <script src=https://lib.baomitu.com/clipboard.js/2.0.11/clipboard.min.js></script>
+
+  <script>Fluid.plugins.codeWidget();</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/4.3.1/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('anchors' in window) {
+        anchors.removeAll();
+        var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+        var res = [];
+        for (var item of el) {
+          res.push('.markdown-body > ' + item.trim());
+        }
+        if (CONFIG.anchorjs.placement === 'left') {
+          anchors.options.class = 'anchorjs-link-left';
+        }
+        anchors.add(res.join(', '));
+      }
+    });
+  });
+</script>
+
+
+  <script  src="/js/local-search.js" ></script>
+
+
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">Blog works best with JavaScript enabled</div>
+  </noscript>
+</body>
+</html>

@@ -1,0 +1,679 @@
+
+
+<!DOCTYPE html>
+<html lang="ko" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/fluid.png">
+  <link rel="icon" href="/img/fluid.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="kxxxgs">
+  <meta name="keywords" content="">
+  
+    <meta name="description" content="[인사이드 안드로이드]Chapter6 - 안드로이드 서비스 개요(2)안드로이드 시스템 서비스안드로이드의 시스템 서비스는 디바이스 제어, 위치 정보 제공, 알람 설정 및 통지 메시지 표시 등과 같이 시스템의 가장 기본적인 핵심 기능들을 제공한다. 이러한 시스템 서비스는 애플리케이션 프레임워크 레이어와 라이브러리 레이어에 각각 존재한다.      시스템 서비스">
+<meta property="og:type" content="article">
+<meta property="og:title" content="[인사이드 안드로이드] 챕터 6 - 안드로이드 서비스 개요(2)">
+<meta property="og:url" content="http://kxxxgs.github.io/chapter6_2/index.html">
+<meta property="og:site_name" content="kxxxgs">
+<meta property="og:description" content="[인사이드 안드로이드]Chapter6 - 안드로이드 서비스 개요(2)안드로이드 시스템 서비스안드로이드의 시스템 서비스는 디바이스 제어, 위치 정보 제공, 알람 설정 및 통지 메시지 표시 등과 같이 시스템의 가장 기본적인 핵심 기능들을 제공한다. 이러한 시스템 서비스는 애플리케이션 프레임워크 레이어와 라이브러리 레이어에 각각 존재한다.      시스템 서비스">
+<meta property="og:locale" content="ko_KR">
+<meta property="og:image" content="http://kxxxgs.github.io/images/post/service4.png">
+<meta property="og:image" content="http://kxxxgs.github.io/images/post/service5.png">
+<meta property="og:image" content="http://kxxxgs.github.io/images/post/service6.png">
+<meta property="og:image" content="http://kxxxgs.github.io/images/post/service7.png">
+<meta property="og:image" content="http://kxxxgs.github.io/images/post/service8.png">
+<meta property="og:image" content="http://kxxxgs.github.io/images/post/service9.png">
+<meta property="og:image" content="http://kxxxgs.github.io/images/post/service10.png">
+<meta property="article:published_time" content="2019-05-08T15:00:00.000Z">
+<meta property="article:modified_time" content="2023-07-06T15:46:07.678Z">
+<meta property="article:author" content="kxxxgs">
+<meta property="article:tag" content="Android">
+<meta property="article:tag" content="인사이드 안드로이드">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="http://kxxxgs.github.io/images/post/service4.png">
+  
+  
+  
+  <title>[인사이드 안드로이드] 챕터 6 - 안드로이드 서비스 개요(2) - kxxxgs</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1749284_hj8rtnfg7um.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_lbnruvf0jn.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"kxxxgs.github.io","root":"/","version":"1.9.5","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":false},"image_zoom":{"enable":false,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":{"measurement_id":null},"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false}},"search_path":"/local-search.xml","include_content_in_search":true};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+  
+
+
+  
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>Kxxxgs</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/">
+                <i class="iconfont icon-home-fill"></i>
+                <span>Home</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/">
+                <i class="iconfont icon-category-fill"></i>
+                <span>Categories</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/">
+                <i class="iconfont icon-user-fill"></i>
+                <span>About</span>
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              <i class="iconfont icon-search"></i>
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">
+              <i class="iconfont icon-dark" id="color-toggle-icon"></i>
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/img/default.png') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="[인사이드 안드로이드] 챕터 6 - 안드로이드 서비스 개요(2)"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2019-05-09 00:00" pubdate>
+          2019년 5월 9일 오전
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          6.7k words
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          56 mins
+        
+      </span>
+    
+
+    
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <h1 id="seo-header">[인사이드 안드로이드] 챕터 6 - 안드로이드 서비스 개요(2)</h1>
+            
+            
+              <div class="markdown-body">
+                
+                <h1 id="인사이드-안드로이드"><a href="#인사이드-안드로이드" class="headerlink" title="[인사이드 안드로이드]"></a>[인사이드 안드로이드]</h1><h2 id="Chapter6-안드로이드-서비스-개요-2"><a href="#Chapter6-안드로이드-서비스-개요-2" class="headerlink" title="Chapter6 - 안드로이드 서비스 개요(2)"></a>Chapter6 - 안드로이드 서비스 개요(2)</h2><h3 id="안드로이드-시스템-서비스"><a href="#안드로이드-시스템-서비스" class="headerlink" title="안드로이드 시스템 서비스"></a>안드로이드 시스템 서비스</h3><p>안드로이드의 시스템 서비스는 디바이스 제어, 위치 정보 제공, 알람 설정 및 통지 메시지 표시 등과 같이 시스템의 가장 기본적인 핵심 기능들을 제공한다. 이러한 시스템 서비스는 애플리케이션 프레임워크 레이어와 라이브러리 레이어에 각각 존재한다.  </p>
+<p><img src="/images/post/service4.png" srcset="/img/loading.gif" lazyload alt="service4" title="service4">  </p>
+<h4 id="시스템-서비스의-분류"><a href="#시스템-서비스의-분류" class="headerlink" title="시스템 서비스의 분류"></a>시스템 서비스의 분류</h4><h5 id="네이티브-시스템-서비스"><a href="#네이티브-시스템-서비스" class="headerlink" title="네이티브 시스템 서비스"></a>네이티브 시스템 서비스</h5><p>네이티브 시스템 서비스는 C++로 작성돼 있으며 라이브러리 레이어에서 동작한다.<br>주요 서비스로는 ① Audio Flinger와 ② Surface Flinger 등이 있다.  </p>
+<p><strong>① Audio Flinger 서비스</strong>  </p>
+<p>Audio Flinger 서비스는 여러 안드로이드 애플리케이션의 오디오 데이터를 믹싱해서 헤드폰이나 스피커처럼 <strong>다양한 오디오 출력 장치로 내보내는 역할</strong>을 한다. <strong>안드로이드장치에서 모든 오디오 데이터는 Audio Flinger를 거쳐 출력된다.</strong>  </p>
+<p><img src="/images/post/service5.png" srcset="/img/loading.gif" lazyload alt="service5" title="service5">  </p>
+<p><strong>② Surface Flinger 서비스</strong>  </p>
+<p>Surface Flinger는 다양한 애플리케이션에서 사용중인 <strong>Surface를 조합해 프레임 버퍼 장치로 렌더링</strong>해주는 서비스다.  </p>
+<p><img src="/images/post/service6.png" srcset="/img/loading.gif" lazyload alt="service6" title="service6">  </p>
+<h5 id="자바-시스템-서비스"><a href="#자바-시스템-서비스" class="headerlink" title="자바 시스템 서비스"></a>자바 시스템 서비스</h5><p>자바 시스템 서비스는 안드로이드 부팅 시 SystemServer라는 시스템 프로세스에 의해 일괄적으로 실행되며, ① 코어 플랫폼 서비스와 ② 하드웨어 서비스로 나뉜다.  </p>
+<p><strong>① 코어 플랫폼 서비스</strong>  </p>
+<p>코어 플랫폼 서비스는 일반적으로 안드로이드 애플리케이션과 직접 상호작용은 하지 않지만 <strong>안드로이드 프레임워크가 동작하는 데 필수적인 서비스</strong>를 말한다.  </p>
+<table>
+<thead>
+<tr>
+<th align="center">코어 플랫폼 서비스</th>
+<th align="center">기능</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center"><code>Activity Manager Service</code></td>
+<td align="center">모든 액티비티에 대한 라이프 사이클 및 액티비티 스택 관리</td>
+</tr>
+<tr>
+<td align="center"><code>Window Manager Service</code></td>
+<td align="center">Surface Flinger 위에 위치하며, 기기 화면에 그릴 내용을 Surface Flinger로 전달</td>
+</tr>
+<tr>
+<td align="center"><code>Package Manager Service</code></td>
+<td align="center">apk파일의 정보를 로딩, 시스템에 어떤 패키지가 설치되고 로딩돼 있는지에 대한 정보 제공</td>
+</tr>
+</tbody></table>
+<p><strong>② 하드웨어 서비스</strong>  </p>
+<p>저수준 하드웨어 제어를 위한 API를 제공하는 서비스를 말한다.  </p>
+<table>
+<thead>
+<tr>
+<th align="center">하드웨어 서비스</th>
+<th align="center">기능</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center"><code>Alarm Manager Service</code></td>
+<td align="center">타이머처럼 특정 시간 후에 애플리케이션을 실행하는 등의 동작을 수행</td>
+</tr>
+<tr>
+<td align="center"><code>Connectivity Service</code></td>
+<td align="center">네트워크의 현재 상태에 대한 정보를 제공</td>
+</tr>
+<tr>
+<td align="center"><code>Location Service</code></td>
+<td align="center">단말의 현재 위치 정보를 제공</td>
+</tr>
+<tr>
+<td align="center"><code>Power Service</code></td>
+<td align="center">장치의 전원 관리를 제어</td>
+</tr>
+<tr>
+<td align="center"><code>Sensor Service</code></td>
+<td align="center">안드로이드에 설치된 각종 센서(마그네틱 센서, 가속도 센서 등)의 센싱 값을 제공</td>
+</tr>
+<tr>
+<td align="center"><code>Telephony Service</code></td>
+<td align="center">전화기의 상태나 전화 서비스에 대한 정보를 제공</td>
+</tr>
+<tr>
+<td align="center"><code>Wifi Service</code></td>
+<td align="center">AP 검색이나 연결 리스트 관리 등 무선랜 연결을 제어</td>
+</tr>
+</tbody></table>
+<p><strong>자바 시스템 서비스 이용</strong>  </p>
+<p>프레임워크 내부에서나 안드로이드 애플리케이션에서 이러한 자바 시스템 서비스를 이용하려면 <strong>각 서비스와 통신 가능한 Local Manager 객체</strong>를 이용해야 한다.  </p>
+<h3 id="시스템-서비스의-실행"><a href="#시스템-서비스의-실행" class="headerlink" title="시스템 서비스의 실행"></a>시스템 서비스의 실행</h3><p>안드로이드 애플리케이션에서 애플리케이션 서비스를 실행할 경우 일반적으로 startService() API함수를 사용한다. 그러나 시스템 서비스는 애플리케이션 서비스와 달리 서비스를 직접 실행할 필요가 없이 getSystemService()를 이용해서 바로 이용할 수 있다. <strong>시스템 서비스는 init 프로세스에 의해 안드로이드 부팅 과정에서 미리 실행되기 때문이다.</strong>  </p>
+<p><img src="/images/post/service7.png" srcset="/img/loading.gif" lazyload alt="service7" title="service7">  </p>
+<h4 id="미디어-서버의-실행-코드-분석"><a href="#미디어-서버의-실행-코드-분석" class="headerlink" title="미디어 서버의 실행 코드 분석"></a>미디어 서버의 실행 코드 분석</h4><h5 id="init-프로세스로부터-실행"><a href="#init-프로세스로부터-실행" class="headerlink" title="init 프로세스로부터 실행"></a>init 프로세스로부터 실행</h5><p>미디어 서버(Media Server)는 Audio Flinger, Media Player Service, Camera Service, Audio Policy Service 등의 네이티브 시스템 서비스를 실행하는 시스템 프로세스로서 init 프로세스에 의해 실행된다.  </p>
+<figure class="highlight crmsh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs crmsh">service media /system/bin/mediaserver<br>    <span class="hljs-keyword">user</span> <span class="hljs-title">media</span><br>    <span class="hljs-keyword">group</span> <span class="hljs-title">system</span> audio camera graphics inet net_bt net_bt_admin<br></code></pre></td></tr></table></figure>
+
+
+<h5 id="네이티브-서비스-인스턴스-생성-및-초기화"><a href="#네이티브-서비스-인스턴스-생성-및-초기화" class="headerlink" title="네이티브 서비스 인스턴스 생성 및 초기화"></a>네이티브 서비스 인스턴스 생성 및 초기화</h5><p>다음은 미디어 서버에 포함된 main() 함수의 주요 부분이다. 여기서는 각 네이티브 서비스에 대한 인스턴스를 생성하고 초기화하는 작업을 수행한다.  </p>
+<figure class="highlight css"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><code class="hljs css">int <span class="hljs-selector-tag">main</span>(int argc, char** argv)<br>&#123;<br>  :<br>  AudioFlinger::<span class="hljs-built_in">instantiate</span>();<br>  MediaPlayerService::<span class="hljs-built_in">instantiate</span>();<br>  CameraService::<span class="hljs-built_in">instantiate</span>();<br>  AudioPolicyService::<span class="hljs-built_in">instantiate</span>();<br>  :<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<h5 id="각-시스템-서비스별-초기화-코드-살펴보기"><a href="#각-시스템-서비스별-초기화-코드-살펴보기" class="headerlink" title="각 시스템 서비스별 초기화 코드 살펴보기"></a>각 시스템 서비스별 초기화 코드 살펴보기</h5><p>시스템 서비스는 프레임워크 내에서 다른 모듈과 통신할 때 바인더 IPC를 사용한다.<br><em>(다음장, 애플리케이션과 같은 서비스 이용자가 시스템 서비스를 이용할 수 있게 서비스 제공자의 정보를 컨텍스트 매니저에 등록)</em>  </p>
+<p>다음은 네이티브 서비스의 초기화 코드를 모아놓은 것이다. new 연산자를 통해 서비스 인스턴스를 생성한 다음 addService() 함수를 이용해서 컨텍스트 매니저에게 각 서비스를 등록한다.<br>여기서 defaultServiceManager() 함수는 컨텍스트 매니저와 바인더 통신을 하는 일종의 프록시 객체인 서비스 매니저를 반환한다. (자세한 내용은 8장)  </p>
+<figure class="highlight scss"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><code class="hljs scss"><span class="hljs-comment">// Audio Flinger 초기화 코드</span><br>void AudioFlinger::<span class="hljs-built_in">instantiate</span>() &#123;<br>    <span class="hljs-built_in">defaultServiceManager</span>()-&gt;<span class="hljs-built_in">addService</span>(<br>            String16(&quot;media.audio_flinger&quot;), new <span class="hljs-built_in">AudioFlinger</span>());<br>&#125;<br><br><span class="hljs-comment">// Media Player Service 초기화 코드</span><br>void MediaPlayerService::<span class="hljs-built_in">instantiate</span>() &#123;<br>    <span class="hljs-built_in">defaultServiceManager</span>()-&gt;<span class="hljs-built_in">addService</span>(<br>            String16(&quot;media.player&quot;), new <span class="hljs-built_in">MediaPlayerService</span>());<br>&#125;<br><br><span class="hljs-comment">// Camera Service 초기화 코드</span><br>void CameraService::<span class="hljs-built_in">instantiate</span>() &#123;<br>    <span class="hljs-built_in">defaultServiceManager</span>()-&gt;<span class="hljs-built_in">addService</span>(<br>            String16(&quot;media.camera&quot;), new <span class="hljs-built_in">CameraService</span>());<br>&#125;<br><br><span class="hljs-comment">// Audio Policy Service 초기화 코드</span><br>void AudioPolicyService::<span class="hljs-built_in">instantiate</span>() &#123;<br>    <span class="hljs-built_in">defaultServiceManager</span>()-&gt;<span class="hljs-built_in">addService</span>(<br>            String16(&quot;media.audio_policy&quot;), new <span class="hljs-built_in">AudioPolicyService</span>());<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>미디어 서버는 각 서비스의 인스턴스를 생성한 다음, 생성된 서비스를 컨텍스트 매니저에 등록하는 것이 전부다.  </p>
+<p><img src="/images/post/service8.png" srcset="/img/loading.gif" lazyload alt="service8" title="service8">  </p>
+<h4 id="시스템-서버의-실행-코드-분석"><a href="#시스템-서버의-실행-코드-분석" class="headerlink" title="시스템 서버의 실행 코드 분석"></a>시스템 서버의 실행 코드 분석</h4><p>시스템 서버는 자바 프로세스이므로 Zygote로부터 생성된다. 시스템 서버가 어떻게 시스템 서비스를 생성하는지 코드를 바탕으로 알아보자.  </p>
+<h5 id="Zygote-프로세스로부터-생성"><a href="#Zygote-프로세스로부터-생성" class="headerlink" title="Zygote 프로세스로부터 생성"></a>Zygote 프로세스로부터 생성</h5><p>Zygote는 맨 처음 생성되는 달빅 가성 머신 기반의 자바 프로세스로서 네이티브 시스템 서비스인 Surface Flinger를 비롯해 다양한 자바 시스템 서비스를 실행하는 역할을 한다.  </p>
+<p>Zygote 실행 시에 -start-system-server라는 옵션이 정의된 것을 확인할 수 있다. 이 옵션은 Zygote에서 시스템 서버를 생성하라고 요청하는 역할을 한다.  </p>
+<figure class="highlight angelscript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs angelscript">service zygote /system/bin/app_process -Xzygote /system/bin --zygote --start-system-server<br>    <span class="hljs-keyword">class</span> <span class="hljs-symbol">main</span><br>    <span class="hljs-symbol">socket</span> <span class="hljs-symbol">zygote</span> <span class="hljs-symbol">stream</span> <span class="hljs-symbol">660</span> <span class="hljs-symbol">root</span> <span class="hljs-symbol">system</span><br>    <span class="hljs-symbol">onrestart</span> <span class="hljs-symbol">write</span> /<span class="hljs-symbol">sys</span>/<span class="hljs-symbol">android_power</span>/<span class="hljs-symbol">request_state</span> <span class="hljs-symbol">wake</span><br>    <span class="hljs-symbol">onrestart</span> <span class="hljs-symbol">write</span> /<span class="hljs-symbol">sys</span>/<span class="hljs-symbol">power</span>/<span class="hljs-symbol">state</span> <span class="hljs-symbol">on</span><br>    <span class="hljs-symbol">onrestart</span> <span class="hljs-symbol">restart</span> <span class="hljs-symbol">media</span><br>    <span class="hljs-symbol">onrestart</span> <span class="hljs-symbol">restart</span> <span class="hljs-symbol">netd</span><br></code></pre></td></tr></table></figure>
+
+<h5 id="android-servers-라이브러리-로드"><a href="#android-servers-라이브러리-로드" class="headerlink" title="android_servers 라이브러리 로드"></a>android_servers 라이브러리 로드</h5><p>다음은 SystemServer의 main() 메서드를 나타내는 코드다.<br>android_servers 라이브러리를 로드하고 init1()메서드를 호출한다. init1() 메서드는 JNI를 통해 다음 system_init() 네이티브 함수를 호출한다.</p>
+<figure class="highlight arduino"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><code class="hljs arduino"><span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">SystemServer</span> &#123;<br>  <span class="hljs-function">native <span class="hljs-keyword">public</span> <span class="hljs-type">static</span> <span class="hljs-type">void</span> <span class="hljs-title">init1</span><span class="hljs-params">(<span class="hljs-type">String</span>[] args)</span></span>;<br><br>  <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-type">static</span> <span class="hljs-type">void</span> <span class="hljs-title">main</span><span class="hljs-params">(<span class="hljs-type">String</span>[] args)</span> </span>&#123;<br>    System.<span class="hljs-built_in">loadLibrary</span>(<span class="hljs-string">&quot;android_servers&quot;</span>);<br>    <span class="hljs-built_in">init1</span>(args);<br>  &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>system_init() 함수의 주된 기능은 Surface Flinger 네이티브 시스템 서비스를 초기화하는 것이다.  </p>
+<figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><code class="hljs rust"><span class="hljs-keyword">extern</span> <span class="hljs-string">&quot;C&quot;</span> status_t <span class="hljs-title function_ invoke__">system_init</span>()<br>&#123;<br>    SurfaceFlinger::<span class="hljs-title function_ invoke__">instantiate</span>(); <span class="hljs-comment">// JNI를 이용해 Surface Flinger 서비스 실행</span><br><br>    AndroidRuntime* runtime = AndroidRuntime::<span class="hljs-title function_ invoke__">getRuntime</span>();<br>    JNIEnv* env = runtime<span class="hljs-punctuation">-&gt;</span><span class="hljs-title function_ invoke__">getJNIEnv</span>();<br><br>    jclass clazz = env<span class="hljs-punctuation">-&gt;</span><span class="hljs-title function_ invoke__">FindClass</span>(<span class="hljs-string">&quot;com/android/server/SystemServer&quot;</span>);<br>    jmethodID methodId = env<span class="hljs-punctuation">-&gt;</span><span class="hljs-title function_ invoke__">GetStaticMethodID</span>(clazz, <span class="hljs-string">&quot;init2&quot;</span>, <span class="hljs-string">&quot;()V&quot;</span>); <span class="hljs-comment">// SystemServer 클래스의 init2() 메서드를 호출한다.</span><br><br>    <span class="hljs-keyword">return</span> NO_ERROR;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<h5 id="자바-시스템-서비스-초기화-및-등록"><a href="#자바-시스템-서비스-초기화-및-등록" class="headerlink" title="자바 시스템 서비스 초기화 및 등록"></a>자바 시스템 서비스 초기화 및 등록</h5><p>SystemServer에서 Surface Flinger를 초기화하고 나면 init2() 메서드가 호출된다. 이 메서드는 Entropy 서비스부터 AppWidget 서비스까지 <strong>안드로이드의 모든 자바 시스템 서비스를 생성하고 초기화하는 역할</strong>을 한다.<br>init2() 메서드에서는 ServerThread를 생성한 다음 실행한다.<br>이렇게 실행된 자바 시스템 서비스 역시 네이티브 시스템 서비스처럼 다른 모듈이 서비스를 활용할 수 있게끔 해당 서비스를 컨텍스트 매니저에 등록해야 한다. 자바 시스템 서비스는 ServiceManager 클래스의 <strong>addService() 정적 메서드를 이용해서 컨텍스트 매니저에 자신을 등록</strong>한다.  </p>
+<figure class="highlight reasonml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><code class="hljs reasonml">public static final void init2<span class="hljs-literal">()</span> &#123;<br>    Thread thr = <span class="hljs-keyword">new</span> <span class="hljs-constructor">ServerThread()</span>;<br>    thr.set<span class="hljs-constructor">Name(<span class="hljs-string">&quot;android.server.ServerThread&quot;</span>)</span>;<br>    thr.start<span class="hljs-literal">()</span>;<br>&#125;<br><br><span class="hljs-keyword">class</span> ServerThread extends Thread &#123;<br>  :<br>  <span class="hljs-module-access"><span class="hljs-module"><span class="hljs-identifier">Slog</span>.</span></span>i(TAG, <span class="hljs-string">&quot;Entropy Mixer&quot;</span>);<br>  <span class="hljs-module-access"><span class="hljs-module"><span class="hljs-identifier">ServiceManager</span>.</span></span>add<span class="hljs-constructor">Service(<span class="hljs-string">&quot;entropy&quot;</span>, <span class="hljs-params">new</span> EntropyMixer()</span>);<br><br>  <span class="hljs-module-access"><span class="hljs-module"><span class="hljs-identifier">Slog</span>.</span></span>i(TAG, <span class="hljs-string">&quot;Power Manager&quot;</span>);<br>  power = <span class="hljs-keyword">new</span> <span class="hljs-constructor">PowerManagerService()</span>;<br>  <span class="hljs-module-access"><span class="hljs-module"><span class="hljs-identifier">ServiceManager</span>.</span></span>add<span class="hljs-constructor">Service(Context.POWER_SERVICE, <span class="hljs-params">power</span>)</span>;<br><br>  <span class="hljs-module-access"><span class="hljs-module"><span class="hljs-identifier">Slog</span>.</span></span>i(TAG, <span class="hljs-string">&quot;Activity Manager&quot;</span>);<br>  context = <span class="hljs-module-access"><span class="hljs-module"><span class="hljs-identifier">ActivityManagerService</span>.</span></span>main(factoryTest);<br><br>  <span class="hljs-module-access"><span class="hljs-module"><span class="hljs-identifier">Slog</span>.</span></span>i(TAG, <span class="hljs-string">&quot;Telephony Registry&quot;</span>);<br>  <span class="hljs-module-access"><span class="hljs-module"><span class="hljs-identifier">ServiceManager</span>.</span></span>add<span class="hljs-constructor">Service(<span class="hljs-string">&quot;telephony.registry&quot;</span>, <span class="hljs-params">new</span> TelephonyRegistry(<span class="hljs-params">context</span>)</span>);<br><br>  :<br>  :<br><br>  <span class="hljs-module-access"><span class="hljs-module"><span class="hljs-identifier">Slog</span>.</span></span>i(TAG, <span class="hljs-string">&quot;Backup Service&quot;</span>);<br>  <span class="hljs-module-access"><span class="hljs-module"><span class="hljs-identifier">ServiceManager</span>.</span></span>add<span class="hljs-constructor">Service(Context.BACKUP_SERVICE, <span class="hljs-params">new</span> BackupManagerService(<span class="hljs-params">context</span>)</span>);<br><br>  <span class="hljs-module-access"><span class="hljs-module"><span class="hljs-identifier">Slog</span>.</span></span>i(TAG, <span class="hljs-string">&quot;AppWidget Service&quot;</span>);<br>  appWidget = <span class="hljs-keyword">new</span> <span class="hljs-constructor">AppWidgetService(<span class="hljs-params">context</span>)</span>;<br>  <span class="hljs-module-access"><span class="hljs-module"><span class="hljs-identifier">ServiceManager</span>.</span></span>add<span class="hljs-constructor">Service(Context.APPWIDGET_SERVICE, <span class="hljs-params">appWidget</span>)</span>;<br><br>  :<br>  :<br>&#125;<br><br></code></pre></td></tr></table></figure>
+
+<p><img src="/images/post/service9.png" srcset="/img/loading.gif" lazyload alt="service9" title="service9">  </p>
+<h3 id="안드로이드-서비스-프레임워크와-바인더-드라이버-개요-및-용어-정리"><a href="#안드로이드-서비스-프레임워크와-바인더-드라이버-개요-및-용어-정리" class="headerlink" title="안드로이드 서비스 프레임워크와 바인더 드라이버 개요 및 용어 정리"></a>안드로이드 서비스 프레임워크와 바인더 드라이버 개요 및 용어 정리</h3><h4 id="주요-용어-정리"><a href="#주요-용어-정리" class="headerlink" title="주요 용어 정리"></a>주요 용어 정리</h4><p><strong>서비스 서버</strong> : 시스템 서비스를 실행하는 프로세스로서 앞에서 설명한 시스템 서버나 미디어 서버가 여기에 해당한다.<br><strong>서비스 클라이언트</strong> : 시스템 서비스를 사용하는 프로세스를 일컫는다.<br><strong>컨텍스트 매니저</strong> : 시스템 서비스를 관리하는 안드로이드 시스템 프로세스로서 시스템에 설치돼 있는 각종 시스템 서비스의 위치 정보인 핸들을 관리한다. 이러한 핸들은 바인더 IPC의 목적지 주소를 지정하는 데 사용된다.<br><strong>서비스 프레임워크</strong> : 서비스 매니저를 포함해서 서비스 사용자와 시스템 서비스간의 RPC 동작에 필요한 공통적인 클래스가 정의돼 있다.<br><strong>서비스 인터페이스</strong> : 서비스 사용자와 시스템 서비스 간에 미리 정해진 인터페이스로서 시스템 서비스는 해당 인터페이스에 맞게 스텁 함수를 구현해서 해당 서비스를 제공해야 하고, 반대로 서비스 사용자 역시 해당 인터페이스에 맞게 서비스를 호출해야 한다.<br><strong>서비스 사용자</strong> : 서비스 클라이언트 프로세스 내에서 실제 서비스를 이용하는 모듈이다.<br><strong>서비스</strong> : 서비스 인터페이스에 정의된 기능을 서비스 스텁 함수로 구현해서 실제 서비스의 기능을 제공하는 모듈을 의미한다.<br><strong>서비스 프록시</strong> : RPC 수행 시 데이터 마샬링을 수행하는 객체이며 서비스 인터페이스별로 존재한다. 서비스 인터페이스에 정의된 함수별로 각각 데이터 마샬링을 수행하는 서비스 프록시 함수를 제공한다.<br><strong>서비스 스텁</strong> : RPC 수행 시 데이터 언마샬링을 수행하는 객체이며, 이 객체 역시 서비스 인터페이스별로 존재한다. 수신된 데이터를 언마샬링해서 연관된 서비스 스텁 함수를 호출한다.<br><strong>바인더 드라이버</strong> : 바인더는 안드로이드에서 IPC를 지원하는 데 사용되는 메커니즘으로 안드로이드 리눅스 커널의 디바이스 드라이버 형태로 포함돼 있다.<br><strong>바인더 IPC</strong> : 안드로이드에서 바인더 드라이버를 통한 프로세스간의 데이터 전달 방식을 말한다.<br><strong>바인더 IPC 데이터</strong> : 서비스 프레임워크와 바인더 드라이버 사이에 사용되는 데이터 포맷<br><strong>바인더 RPC</strong> : 서비스 사용자가 서비스에서 제공하는 특정 서비스 인터페이스 기반의 함수를 마치 자신의 로컬 함수 호출하듯이 원격으로 처리하는 동작을 말한다. 바인더 RPC는 내부적으로는 바인더 IPC 메커니즘 기반으로 동작한다.<br><strong>바인더 RPC 데이터</strong> : 서비스 사용자와 서비스 간의 바인더 RPC를 수행하는 데 사용되는 데이터</p>
+<p>다음 그림은 서비스 동작 원리를 일반화한 것으로서 Foo라는 시스템 서비스에서 제공하는 foo() 메서드를 서비스 사용자가 RPC 형태로 호출하는 모습을 보여준다.  </p>
+<p><img src="/images/post/service10.png" srcset="/img/loading.gif" lazyload alt="service10" title="service10">  </p>
+<p>서비스 사용자는 foo() 프록시 함수를 호출해서 Foo 서비스를 이용하기 위한 인자로 구성된 바인더 RPC 데이터를 전달한다. 바인더 PRC 데이터는 마샬링을 거쳐 서비스 프레임워크를 통해 바인더 IPC 데이터로 생성된 다음 바인더 드라이버를 통해 서비스 서버 측에 전송된다.  </p>
+<p>서비스 서버 측에서 수신된 바인더 IPC 데이터는 서비스 프레임워크를 거치면서 언마샬링된 다음, 서비스 스텁의 onTransact() 함수에 전송된다. 서비스 스텁은 해당 바인더 IPC 데이터 안에 포함된 RPC 코드를 통해 Foo 서비스의 foo() 서비스 스텁 함수에 대한 바인더 RPC임을 판단한다. 수신된 바인더 IPC 데이터에 포함된 바인더 RPC 데이터를 인자로 해서 foo() 서비스 스텁 함수를 호출한다.  </p>
+
+                
+              </div>
+            
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+    <div class="post-meta mr-3 d-flex align-items-center">
+      <i class="iconfont icon-category"></i>
+      
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/categories/Android/" class="category-chain-item">Android</a>
+  
+  
+
+      </span>
+    
+  
+</span>
+
+    </div>
+  
+  
+    <div class="post-meta">
+      <i class="iconfont icon-tags"></i>
+      
+        <a href="/tags/Android/" class="print-no-link">#Android</a>
+      
+        <a href="/tags/%EC%9D%B8%EC%82%AC%EC%9D%B4%EB%93%9C-%EC%95%88%EB%93%9C%EB%A1%9C%EC%9D%B4%EB%93%9C/" class="print-no-link">#인사이드 안드로이드</a>
+      
+    </div>
+  
+</div>
+
+
+              
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/chapter7/" title="[인사이드 안드로이드] 챕터 7 - 안드로이드 바인더 IPC">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">[인사이드 안드로이드] 챕터 7 - 안드로이드 바인더 IPC</span>
+                        <span class="visible-mobile">Previous</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/chapter6/" title="[인사이드 안드로이드] 챕터 6 - 안드로이드 서비스 개요">
+                        <span class="hidden-mobile">[인사이드 안드로이드] 챕터 6 - 안드로이드 서비스 개요</span>
+                        <span class="visible-mobile">Next</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header">
+    <i class="iconfont icon-list"></i>
+    <span>Table of Contents</span>
+  </p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">검색</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">키워드</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <span>Kxxxgs</span> <i class="iconfont icon-love"></i> 
+    </div>
+  
+  
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.4/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.20.1/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    window.tocbot.init(Object.assign({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      scrollSmooth    : true,
+      includeTitleTags: true,
+      headingsOffset  : -boardTop,
+    }, CONFIG.toc));
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('tocbot' in window) {
+        tocbot.refresh();
+        var toc = jQuery('#toc');
+        if (toc.length === 0 || !tocbot) {
+          return;
+        }
+        if (toc.find('.toc-list-item').length > 0) {
+          toc.css('visibility', 'visible');
+        }
+      }
+    });
+  });
+</script>
+
+
+  <script src=https://lib.baomitu.com/clipboard.js/2.0.11/clipboard.min.js></script>
+
+  <script>Fluid.plugins.codeWidget();</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/4.3.1/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('anchors' in window) {
+        anchors.removeAll();
+        var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+        var res = [];
+        for (var item of el) {
+          res.push('.markdown-body > ' + item.trim());
+        }
+        if (CONFIG.anchorjs.placement === 'left') {
+          anchors.options.class = 'anchorjs-link-left';
+        }
+        anchors.add(res.join(', '));
+      }
+    });
+  });
+</script>
+
+
+  <script  src="/js/local-search.js" ></script>
+
+
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">Blog works best with JavaScript enabled</div>
+  </noscript>
+</body>
+</html>

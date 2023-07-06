@@ -1,0 +1,693 @@
+
+
+<!DOCTYPE html>
+<html lang="ko" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/fluid.png">
+  <link rel="icon" href="/img/fluid.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="kxxxgs">
+  <meta name="keywords" content="">
+  
+    <meta name="description" content="[인사이드 안드로이드]Chapter11 - 자바 시스템 서비스 동작 분석액티비티 매니저 서비스액티비티 매니저 서비스는 자바 시스템 서비스의 일종인 코어 플랫폼 서비스로서 안드로이드 애플리케이션 컴포넌트인 액티비티, 서비스, 브로드캐스트 리시버등을 생성하고, 이들의 생명주기를 관리하는 역할을 한다.   ApiDemos 예제 코드에 들어있는 Remote Ser">
+<meta property="og:type" content="article">
+<meta property="og:title" content="[인사이드 안드로이드] 챕터 11 - 자바 시스템 서비스 동작 분석">
+<meta property="og:url" content="http://kxxxgs.github.io/chapter11/index.html">
+<meta property="og:site_name" content="kxxxgs">
+<meta property="og:description" content="[인사이드 안드로이드]Chapter11 - 자바 시스템 서비스 동작 분석액티비티 매니저 서비스액티비티 매니저 서비스는 자바 시스템 서비스의 일종인 코어 플랫폼 서비스로서 안드로이드 애플리케이션 컴포넌트인 액티비티, 서비스, 브로드캐스트 리시버등을 생성하고, 이들의 생명주기를 관리하는 역할을 한다.   ApiDemos 예제 코드에 들어있는 Remote Ser">
+<meta property="og:locale" content="ko_KR">
+<meta property="og:image" content="http://kxxxgs.github.io/images/post/JS1.png">
+<meta property="og:image" content="http://kxxxgs.github.io/images/post/JS2.png">
+<meta property="og:image" content="http://kxxxgs.github.io/images/post/JS3.png">
+<meta property="og:image" content="http://kxxxgs.github.io/images/post/JS4.png">
+<meta property="og:image" content="http://kxxxgs.github.io/images/post/JS5.png">
+<meta property="og:image" content="http://kxxxgs.github.io/images/post/JS6.png">
+<meta property="og:image" content="http://kxxxgs.github.io/images/post/JS7.png">
+<meta property="og:image" content="http://kxxxgs.github.io/images/post/JS8.png">
+<meta property="og:image" content="http://kxxxgs.github.io/images/post/JS9.png">
+<meta property="og:image" content="http://kxxxgs.github.io/images/post/JS10.png">
+<meta property="og:image" content="http://kxxxgs.github.io/images/post/JS11.png">
+<meta property="article:published_time" content="2019-05-29T15:00:00.000Z">
+<meta property="article:modified_time" content="2023-07-06T15:45:34.735Z">
+<meta property="article:author" content="kxxxgs">
+<meta property="article:tag" content="Android">
+<meta property="article:tag" content="인사이드 안드로이드">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="http://kxxxgs.github.io/images/post/JS1.png">
+  
+  
+  
+  <title>[인사이드 안드로이드] 챕터 11 - 자바 시스템 서비스 동작 분석 - kxxxgs</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1749284_hj8rtnfg7um.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_lbnruvf0jn.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"kxxxgs.github.io","root":"/","version":"1.9.5","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":false},"image_zoom":{"enable":false,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":{"measurement_id":null},"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false}},"search_path":"/local-search.xml","include_content_in_search":true};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+  
+
+
+  
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>Kxxxgs</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/">
+                <i class="iconfont icon-home-fill"></i>
+                <span>Home</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/">
+                <i class="iconfont icon-category-fill"></i>
+                <span>Categories</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/">
+                <i class="iconfont icon-user-fill"></i>
+                <span>About</span>
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              <i class="iconfont icon-search"></i>
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">
+              <i class="iconfont icon-dark" id="color-toggle-icon"></i>
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/img/default.png') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="[인사이드 안드로이드] 챕터 11 - 자바 시스템 서비스 동작 분석"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2019-05-30 00:00" pubdate>
+          2019년 5월 30일 오전
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          16k words
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          135 mins
+        
+      </span>
+    
+
+    
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <h1 id="seo-header">[인사이드 안드로이드] 챕터 11 - 자바 시스템 서비스 동작 분석</h1>
+            
+            
+              <div class="markdown-body">
+                
+                <h1 id="인사이드-안드로이드"><a href="#인사이드-안드로이드" class="headerlink" title="[인사이드 안드로이드]"></a>[인사이드 안드로이드]</h1><h2 id="Chapter11-자바-시스템-서비스-동작-분석"><a href="#Chapter11-자바-시스템-서비스-동작-분석" class="headerlink" title="Chapter11 - 자바 시스템 서비스 동작 분석"></a>Chapter11 - 자바 시스템 서비스 동작 분석</h2><h3 id="액티비티-매니저-서비스"><a href="#액티비티-매니저-서비스" class="headerlink" title="액티비티 매니저 서비스"></a>액티비티 매니저 서비스</h3><p>액티비티 매니저 서비스는 자바 시스템 서비스의 일종인 코어 플랫폼 서비스로서 안드로이드 애플리케이션 컴포넌트인 액티비티, 서비스, 브로드캐스트 리시버등을 생성하고, 이들의 생명주기를 관리하는 역할을 한다.  </p>
+<p>ApiDemos 예제 코드에 들어있는 Remote Service Controller 애플리케이션을 토대로 액티비티 매니저 서비스가 안드로이드의 애플리케이션 서비스를 어떻게 생성하고 해당 서비스의 생명주기를 어떻게 제어하는지 알아본다.  </p>
+<p><img src="/images/post/JS1.png" srcset="/img/loading.gif" lazyload alt="JS1" title="JS1">  </p>
+<p>Remote Service Controller 예제 애플리케이션은 별도의 프로세스를 통해 리모트 서비스를 실행하는 예제로 ⑴ ‘Start Service’ 버튼을 누르면 ⑵ RemoteService가 시작되는 간단한 프로그램이다.  </p>
+<p><img src="/images/post/JS2.png" srcset="/img/loading.gif" lazyload alt="JS2" title="JS2">  </p>
+<p>⑴ 안드로이드 애플리케이션은 startService()나 bindService() API를 통해 애플리케이션 서비스를 생성한다.<br>⑵ 애플리케이션으로부터 startService()를 통해 서비스 실행 요청을 받은 액티비 매니저 서비스는 요청받은 서비스 클래스(RemoteService.class)를 바로 로드하는 것이 아니라 Zygote에게 서비스를 실행시키기 위한 ActivityThread 생성을 요청한다.<br>⑶ 액티비티 매니저 서비스로부터 ActivityThread 실행을 요청받은 Zygote는 새로운 프로세스를 생성한 다음 그위에 ActivityThread 클래스를 로딩한다.<br>⑷ ActivityThread에게 RemoteService 서비스의 생성을 요청한다.<br>⑸ ActivityThread는 RemoteService를 실행한다.  </p>
+<p>이렇듯 안드로이드의 액티비티 매니저 서비스는 애플리케이션 서비스를 포함한 액티비티, 브로드캐스트 리시버 같은 안드로이드 애플리케이션 컴포넌트를 생성하는 중요한 역할을 하는 시스템 서비스다.  </p>
+<h3 id="액티비티-매니저-서비스를-통한-서비스-생성-코드-분석"><a href="#액티비티-매니저-서비스를-통한-서비스-생성-코드-분석" class="headerlink" title="액티비티 매니저 서비스를 통한 서비스 생성 코드 분석"></a>액티비티 매니저 서비스를 통한 서비스 생성 코드 분석</h3><p>액티비티가 startService() API 메서드를 호출할 경우 액티비티 매니저 서비스가 어떻게 애플리케이션 서비스를 생성하는지 소스 코드를 바탕으로 자세히 살펴보자  </p>
+<h4 id="Controller-액티비티-startService-메서드-호출"><a href="#Controller-액티비티-startService-메서드-호출" class="headerlink" title="Controller 액티비티 - startService() 메서드 호출"></a>Controller 액티비티 - startService() 메서드 호출</h4><p>⑴과 같이 ‘Start Servcie’ 버튼을 누르면 코드 11-1의 이벤트 핸들러가 호출된다. 이 경우 단순히 인텐트(intent)를 인자로 startService() API 메서드를 호출한다.  </p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">private</span> <span class="hljs-type">OnClickListener</span> <span class="hljs-variable">mStartListener</span> <span class="hljs-operator">=</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">OnClickListener</span>() &#123;<br>    <span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">onClick</span><span class="hljs-params">(View v)</span> &#123;<br>        startService(<span class="hljs-keyword">new</span> <span class="hljs-title class_">Intent</span>(<span class="hljs-string">&quot;com.example.android.apis.app.REMOTE_SERVICE&quot;</span>));<br>    &#125;<br>&#125;;<br></code></pre></td></tr></table></figure>
+
+<h4 id="액티비티-매니저-서비스의-startService-메서드-호출-과정-바인더-RPC-활용"><a href="#액티비티-매니저-서비스의-startService-메서드-호출-과정-바인더-RPC-활용" class="headerlink" title="액티비티 매니저 서비스의 startService() 메서드 호출 과정(바인더 RPC 활용)"></a>액티비티 매니저 서비스의 startService() 메서드 호출 과정(바인더 RPC 활용)</h4><p>액티비티에서 호출한 startService() API는 서비스 생성 및 실행과 관련된 내용을 액티비티 매니저 서비스에 요청하는 기능만 수행할 뿐 실제 구현은 액티비티 매니저 서비스에 속한, 동일한 이름을 가진 startService() 스텁 메서드에 들어 있다.  </p>
+<p>즉, 액티비티에서 호출한 startService() API는 자바 서비스 프레임워크 기반에서 바인더 RPC 형태로 액티비티 매니저 서비스에서 제공하는 startService() 스텁 메서드를 호출하게 되는 것이다.  </p>
+<p><img src="/images/post/JS3.png" srcset="/img/loading.gif" lazyload alt="JS3" title="JS3">  </p>
+<p>⑴ Controller 액티비티 - ActivityManagerProxy 객체의 startService() 프록시 메서드를 호출<br>⑵ ActivityManagerProxy 객체 - 자바 서비스 프레임워크를 통해 ActivityManagerNative 객체에 START_SERVICE_TRANSACTION RPC 코드와 바인더 RPC 데이터를 전송<br>⑶ ActivityManagerNative 객체 - ActivityManagerService에 포함된 startService() 스텁 메서드를 호출  </p>
+<h5 id="⑴-Controller-액티비티"><a href="#⑴-Controller-액티비티" class="headerlink" title="⑴ Controller 액티비티"></a>⑴ Controller 액티비티</h5><figure class="highlight scala"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs scala">public <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">ContextWrapper</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">Context</span> </span>&#123;<br>    <span class="hljs-type">Context</span> mBase;<br><br>    public <span class="hljs-type">ComponentName</span> startService(<span class="hljs-type">Intent</span> service) &#123;<br>        <span class="hljs-keyword">return</span> mBase.startService(service); <span class="hljs-comment">// ContextImpl 객체의 startService() 메서드 호출</span><br>    &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>ContextWrapper는 context 추상 클래스를 확장한 클래스로 멤버 변수 mBase에 저장된 context 객체를 래핑(wrapping)하는 역할을 한다. 현재 ContextWrapper 객체는 그림에서 볼 수 있듯이 Controller 액티비티의 ContextImpl 객체를 래핑하고 있다.  </p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">public</span> ComponentName <span class="hljs-title function_">startService</span><span class="hljs-params">(Intent service)</span> &#123;<br>    <span class="hljs-type">ComponentName</span> <span class="hljs-variable">cn</span> <span class="hljs-operator">=</span> ActivityManagerNative.getDefault().startService(<br>                          mMainThread.getApplicationThread(), service,<br>                          service.resolveTypeIfNeeded(getContentResolver()));<br><br>    <span class="hljs-keyword">return</span> cn;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>다음 그림은 위 코드의 핵심 부분인 ActivityManagerNative.getDefault().startService()의 과정을 나타낸다. 아래 그림에서도 확인할 수 있듯이 ActivityManagerNative.getDefault() 함수는 결국 ActivityManagerProxy 객체를 반환하는데 이 객체는 액티비티 매니저 서비스가 제공하는 IActivityManager 서비스 인터페이스 기반의 메서드들을 바인더 RPC 를 통해서 호출하는 역할을 한다. 따라서 액티비티 측에서는 이 객체를 통해 startService() 스텁 메서드처럼 액티비티 매니저 서비스가 제공하는 IActivityManager 인터페이스에 포함된 다양한 메서드를 로컬 함수를 호출하듯 자유롭게 이용할 수 있다.  </p>
+<p><img src="/images/post/JS4.png" srcset="/img/loading.gif" lazyload alt="JS4" title="JS4">  </p>
+<p>따라서 ActivityManagerNative.getDefault().startService() 메서드는 ActivityManagerProxy 클래스의 startService() 프록시 메서드를 호출한다. 이는 결국 ActivityManagerService의 startService() 스텁 메서드를 원격으로 호출하는 역할을 수행한다.  </p>
+<figure class="highlight reasonml"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs reasonml">public ComponentName start<span class="hljs-constructor">Service(IApplicationThread <span class="hljs-params">caller</span>, Intent <span class="hljs-params">service</span>, String <span class="hljs-params">resolvedType</span>)</span><br></code></pre></td></tr></table></figure>
+
+<p>startService() 메서드의 주요 인자를 간단히 살펴보면 첫 번째 인자인 caller는 IApplicationThread 타입의 변수로서 액티비티 매니저 서비스로부터 전송된 IApplicationThread 서비스 인터페이스 기반의 바인더 RPC 를 처리하는 역할을 수행한다.  </p>
+<h5 id="⑵-ActivityManagerProxy-객체-startService-프록시-메서드-처리"><a href="#⑵-ActivityManagerProxy-객체-startService-프록시-메서드-처리" class="headerlink" title="⑵ ActivityManagerProxy 객체 - startService() 프록시 메서드 처리"></a>⑵ ActivityManagerProxy 객체 - startService() 프록시 메서드 처리</h5><figure class="highlight haskell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><code class="hljs haskell"><span class="hljs-title">public</span> <span class="hljs-type">ComponentName</span> startService(<span class="hljs-type">IApplicationThread</span> caller, <span class="hljs-type">Intent</span> service,<br>        <span class="hljs-type">String</span> resolvedType) throws <span class="hljs-type">RemoteException</span><br>&#123;<br>    <span class="hljs-type">Parcel</span> <span class="hljs-class"><span class="hljs-keyword">data</span> = <span class="hljs-type">Parcel</span>.obtain();</span><br>    <span class="hljs-type">Parcel</span> reply = <span class="hljs-type">Parcel</span>.obtain();<br><br>    // 전송 <span class="hljs-class"><span class="hljs-keyword">data</span> 생성 (인자값을 <span class="hljs-title">data</span>에 저장)</span><br>    <span class="hljs-class"><span class="hljs-keyword">data</span>.writeInterfaceToken(<span class="hljs-type">IActivityManager</span>.<span class="hljs-title">descriptor</span>);</span><br>    <span class="hljs-class"><span class="hljs-keyword">data</span>.writeStrongBinder(<span class="hljs-title">caller</span> != <span class="hljs-title">null</span> ? <span class="hljs-title">caller</span>.<span class="hljs-title">asBinder</span>() : null);</span><br>    service.writeToParcel(<span class="hljs-class"><span class="hljs-keyword">data</span>, 0);</span><br>    <span class="hljs-class"><span class="hljs-keyword">data</span>.writeString(<span class="hljs-title">resolvedType</span>);</span><br><br>    // 바인더 <span class="hljs-type">RPC</span> 데이터 전송<br>    mRemote.transact(<span class="hljs-type">START_SERVICE_TRANSACTION</span>, <span class="hljs-class"><span class="hljs-keyword">data</span>, reply, 0);</span><br>    reply.readException();<br>    <span class="hljs-type">ComponentName</span> res = <span class="hljs-type">ComponentName</span>.readFromParcel(reply);<br>    <span class="hljs-class"><span class="hljs-keyword">data</span>.recycle();</span><br>    reply.recycle();<br><br>    return res;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>위 코드에서 mRemote.transact() 메서드는 자바 객체에서 바인더 RPC 데이터를 전송하는 데 쓰인다. ActivityManagerProxy 객체는 startService() 프록시 메서드의 인자로 전달된 caller, service, resolved에 들어 있는 값을 바인더 RPC 데이터를 저장하는 데 사용되는 Pacel 객체 변수인 data에 저장한다. 그런 다음 START_SERVICE_TRANSACTION 트랜잭션을 통해 저장한 data 값을 ActivityManagerNative 객체에 전달한다.  </p>
+<h5 id="⑶-ActivityManagerNative-객체-startService-스텁-메서드-호출"><a href="#⑶-ActivityManagerNative-객체-startService-스텁-메서드-호출" class="headerlink" title="⑶ ActivityManagerNative 객체 - startService() 스텁 메서드 호출"></a>⑶ ActivityManagerNative 객체 - startService() 스텁 메서드 호출</h5><p>ActivityManagerNative 객체는 상대편인 ActivityManagerProxy 객체에게서 전달받은 RPC 코드를 토대로 액티비티 매니저 서비스에서 호출한 스텁 매서드를 파악한다. 여기서는 ActivityManagerProxy 객체가 START_SERVICE_TRANSACTION RPC코드를 전송했으므로 아래 코드에서 볼 수 있듯이 startService() 스텁 메서드가 호출돼야 한다.  </p>
+<p>다음은 startService() 스텁 메서드에 전달해야 할 인자를 구해서 startService() 스텁 메서드를 실제로 호출하면 된다. 이를 위해 RPC 데이터를 언마샬링한 후, 액티비티 매니저 서비스의 startService() 스텁 메서드를 호출한다.  </p>
+<figure class="highlight haskell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><code class="hljs haskell"><span class="hljs-title">public</span> boolean onTransact(int code, <span class="hljs-type">Parcel</span> <span class="hljs-class"><span class="hljs-keyword">data</span>, <span class="hljs-type">Parcel</span> reply, int flags)</span><br>        throws <span class="hljs-type">RemoteException</span> &#123;<br>    switch (code) &#123;<br>    <span class="hljs-keyword">case</span> <span class="hljs-type">START_ACTIVITY_TRANSACTION</span>:<br>    &#123;<br>        <span class="hljs-class"><span class="hljs-keyword">data</span>.enforceInterface(<span class="hljs-type">IActivityManager</span>.<span class="hljs-title">descriptor</span>);</span><br>        <span class="hljs-type">IBinder</span> b = <span class="hljs-class"><span class="hljs-keyword">data</span>.readStrongBinder();</span><br>        <span class="hljs-type">IApplicationThread</span> app = <span class="hljs-type">ApplicationThreadNative</span>.asInterface(b);<br>        <span class="hljs-type">Intent</span> intent = <span class="hljs-type">Intent</span>.<span class="hljs-type">CREATOR</span>.createFromParcel(<span class="hljs-class"><span class="hljs-keyword">data</span>);</span><br>        <span class="hljs-type">String</span> resolvedType = <span class="hljs-class"><span class="hljs-keyword">data</span>.readString();</span><br><br>        <span class="hljs-type">Uri</span>[] grantedUriPermissions = <span class="hljs-class"><span class="hljs-keyword">data</span>.createTypedArray(<span class="hljs-type">Uri</span>.<span class="hljs-type">CREATOR</span>);</span><br>        int grantedMode = <span class="hljs-class"><span class="hljs-keyword">data</span>.readInt();</span><br>        <span class="hljs-type">IBinder</span> resultTo = <span class="hljs-class"><span class="hljs-keyword">data</span>.readStrongBinder();</span><br>        <span class="hljs-type">String</span> resultWho = <span class="hljs-class"><span class="hljs-keyword">data</span>.readString();    </span><br>        int requestCode = <span class="hljs-class"><span class="hljs-keyword">data</span>.readInt();</span><br>        boolean onlyIfNeeded = <span class="hljs-class"><span class="hljs-keyword">data</span>.readInt() != 0;</span><br>        boolean debug = <span class="hljs-class"><span class="hljs-keyword">data</span>.readInt() != 0;</span><br>        <span class="hljs-type">String</span> profileFile = <span class="hljs-class"><span class="hljs-keyword">data</span>.readString();</span><br>        <span class="hljs-type">ParcelFileDescriptor</span> profileFd = <span class="hljs-class"><span class="hljs-keyword">data</span>.readInt() != 0</span><br>                ? <span class="hljs-class"><span class="hljs-keyword">data</span>.readFileDescriptor() : null;</span><br>        boolean autoStopProfiler = <span class="hljs-class"><span class="hljs-keyword">data</span>.readInt() != 0;</span><br>        int result = startActivity(app, intent, resolvedType,<br>                grantedUriPermissions, grantedMode, resultTo, resultWho,<br>                requestCode, onlyIfNeeded, debug, profileFile, profileFd, autoStopProfiler);<br>        reply.writeNoException();<br>        reply.writeInt(result);<br>        return true;<br>    &#125;<br>    :<br>    return super.onTransact(code, <span class="hljs-class"><span class="hljs-keyword">data</span>, reply, flags);</span><br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>onTransact() 메서드의 역할은 아래 그림과 같이 ActivityManagerProxy의 startService() 프록시 메서드의 인자 값(caller, service, resolvedType)이 마샬링된 data 변수(Parcel 객체)를 바인더 RPC를 통해 수신한 다음, data 변수를 언마샬링하고 각 데이터를 별도의 변수에 저장하는 것이다. 그러고 나서 저장된 변수를 인자로 삼아 액티비티 매니저 서비스의 startService() 스텁 메서드를 호출하는 것이다.  </p>
+<p><img src="/images/post/JS5.png" srcset="/img/loading.gif" lazyload alt="JS5" title="JS5">  </p>
+<p>아래 코드에 대해 살펴보면,</p>
+<figure class="highlight reasonml"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs reasonml">IApplicationThread app = <span class="hljs-module-access"><span class="hljs-module"><span class="hljs-identifier">ApplicationThreadNative</span>.</span></span><span class="hljs-keyword">as</span><span class="hljs-constructor">Interface(<span class="hljs-params">b</span>)</span>;<br></code></pre></td></tr></table></figure>
+
+<p>ApplicationThreadNative.asInterface() 메서드는 ApplicationThreadNative 객체에 대응하는 ApplicationThreadProxy 객체를 생성한다. 그러고 나면 서비스 생성을 요청한 RemoteActivityController 액티비티와 액티비티 매니저 서비스 간에는 다음 그림과 같이 두 개의 바인더 연결이 성립된다. 액티비티는 IActivityManager 서비스 인터페이스 기반의 바인더 RPC를 통해 서비스 실행, 인텐트 송수신 등의 기능 수행을 요청할 수 있다. 반대로 액티비티 매니저 서비스는 IApplicationThread 인터페이스 기반의 바인더 RPC를 통해 자신과 연결된 애플리케이션을 제어할 수 있다.  </p>
+<p><img src="/images/post/JS6.png" srcset="/img/loading.gif" lazyload alt="JS6" title="JS6">  </p>
+<h4 id="액티비티-매니저-서비스-startService-스텁-메서드-실행"><a href="#액티비티-매니저-서비스-startService-스텁-메서드-실행" class="headerlink" title="액티비티 매니저 서비스 - startService() 스텁 메서드 실행"></a>액티비티 매니저 서비스 - startService() 스텁 메서드 실행</h4><p>이제 액티비티 매니저 서비스가 요청받은 서비스를 어떻게 실행하는지 살펴본다.  </p>
+<figure class="highlight arduino"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><code class="hljs arduino"><span class="hljs-function"><span class="hljs-keyword">public</span> ComponentName <span class="hljs-title">startService</span><span class="hljs-params">(IApplicationThread caller, Intent service,</span></span><br><span class="hljs-params"><span class="hljs-function">        <span class="hljs-type">String</span> resolvedType, <span class="hljs-type">int</span> userId)</span> </span>&#123;<br><br>        <span class="hljs-keyword">final</span> <span class="hljs-type">int</span> callingPid = Binder.<span class="hljs-built_in">getCallingPid</span>();<br>        <span class="hljs-keyword">final</span> <span class="hljs-type">int</span> callingUid = Binder.<span class="hljs-built_in">getCallingUid</span>();<br>        <span class="hljs-keyword">final</span> <span class="hljs-type">long</span> origId = Binder.<span class="hljs-built_in">clearCallingIdentity</span>();<br>        ComponentName res = mServices.<span class="hljs-built_in">startServiceLocked</span>(caller, service,<br>                resolvedType, callingPid, callingUid, userId);<br>        <span class="hljs-keyword">return</span> res;<br>    &#125;<br></code></pre></td></tr></table></figure>
+
+<p>이 메서드에서 주로 하는 일은 startServiceLocked() 메서드를 호출하는 것이다.  </p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><code class="hljs java">ComponentName <span class="hljs-title function_">startServiceLocked</span><span class="hljs-params">(IApplicationThread caller, Intent service, String</span><br><span class="hljs-params">            resolvedType, <span class="hljs-type">int</span> callingPid, <span class="hljs-type">int</span> callingUid, <span class="hljs-type">int</span> userId)</span> &#123;<br>    <span class="hljs-comment">// retrieveServiceLocked() 메서드의 반환값인 ServiceLookupResult 구조체 변수 res로부터 ServiceRecord 값을 얻는다.</span><br>    <span class="hljs-type">ServiceLookupResult</span> <span class="hljs-variable">res</span> <span class="hljs-operator">=</span><br>            retrieveServiceLocked(service, resolvedType,<br>                    callingPid, callingUid, userId, <span class="hljs-literal">true</span>, callerFg);<br>    <span class="hljs-type">ServiceRecord</span> <span class="hljs-variable">r</span> <span class="hljs-operator">=</span> res.record;<br>    <span class="hljs-keyword">return</span> startServiceInnerLocked(smap, service, r, callerFg, addToStarting);<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>이 메서드에서 주로 하는 일은 ServiceRecord 값을 얻는 것이다. ServiceRecord는 안드로이드 애플리케이션 서비스에 대한 각종 정보(서비스 패키지명과 위치, 권한, 서비스 프로세스 정보, 실행 통계 정보 등)가 담긴 클래스이다.  </p>
+<p>이렇게 구한 ServiceRecord 객체를 bringUpServiceLocked() 메서드의 첫 번째 인자로 전달한다.  </p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">private</span> <span class="hljs-keyword">final</span> String <span class="hljs-title function_">bringUpServiceLocked</span><span class="hljs-params">(ServiceRecord r, <span class="hljs-type">int</span> intentFlags,</span><br><span class="hljs-params">            <span class="hljs-type">boolean</span> execInFg, <span class="hljs-type">boolean</span> whileRestarting)</span> &#123;<br><br>    <span class="hljs-keyword">final</span> <span class="hljs-type">String</span> <span class="hljs-variable">appName</span> <span class="hljs-operator">=</span> r.processName;<br>    <span class="hljs-type">ProcessRecord</span> <span class="hljs-variable">app</span> <span class="hljs-operator">=</span> getProcessRecordLocked(appName, r.appInfo.uid);<br><br>    <span class="hljs-keyword">if</span> (app != <span class="hljs-literal">null</span> &amp;&amp; app.thread != <span class="hljs-literal">null</span>) &#123;<br>          <span class="hljs-comment">// 기존 프로세스 영역 내에서 서비스를 실행함.</span><br>          realStartServiceLocked(r, app, execInFg);<br>          <span class="hljs-keyword">return</span> <span class="hljs-literal">true</span>;<br>    &#125;<br><br>    startProcessLocked(appName, r.appInfo, <span class="hljs-literal">true</span>, intentFlags, <span class="hljs-string">&quot;service&quot;</span>, r.name, <span class="hljs-literal">false</span>);<br>    mPendingServices.add(r);<br><br>    <span class="hljs-keyword">return</span> <span class="hljs-literal">true</span>;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>bringUpServiceLocked() 메서드는 ServiceRecord 객체를 참조해서 해당 서비스가 실행된 프로세스 이름과 uid를 통해 ProcessRecord 객체가 존재하는지 검사한다. 이를 위해 getProcessRecordLocked() 메서드가 호출된다.  </p>
+<figure class="highlight processing"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><code class="hljs processing"><span class="hljs-keyword">final</span> ProcessRecord <span class="hljs-title function_">startProcessLocked</span>(<span class="hljs-built_in">String</span> processName, ApplicationInfo info,<br>            <span class="hljs-type">boolean</span> knownToBeDead, <span class="hljs-type">int</span> intentFlags, <span class="hljs-built_in">String</span> hostingType, ComponentName hostingName,<br>            <span class="hljs-type">boolean</span> allowWhileBooting) &#123;<br>                <span class="hljs-comment">// ProcessRecord를 새로 생성</span><br>                app = <span class="hljs-title function_">getProcessRecordLocked</span>(<span class="hljs-literal">null</span>, info, processName);<br>                mProcessNames.<span class="hljs-property">put</span>(processName, info.<span class="hljs-property">uid</span>, app);<br>                <span class="hljs-title function_">startProcessLocked</span>(app, hostingType, hostingNameStr);<br><br>                <span class="hljs-title function_">return</span> (app.<span class="hljs-property">pid</span> != <span class="hljs-number">0</span>) ? app : <span class="hljs-literal">null</span>;<br>            &#125;<br><br><span class="hljs-keyword">private</span> <span class="hljs-keyword">final</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">startProcessLocked</span>(ProcessRecord app, <span class="hljs-built_in">String</span> hostingType, <span class="hljs-built_in">String</span> hostingNameStr) &#123;<br>  <span class="hljs-type">int</span> uid = app.<span class="hljs-property">info</span>.<span class="hljs-property">uid</span>;<br>  <span class="hljs-type">int</span>[] gids = <span class="hljs-literal">null</span>;<br>  <span class="hljs-type">int</span> debugFlags = <span class="hljs-number">0</span>;<br><br>  gids = mContext.<span class="hljs-property">getPackageManager</span>().<span class="hljs-property">getPackageGids</span>(app.<span class="hljs-property">info</span>.<span class="hljs-property">packageName</span>);<br><br>  <span class="hljs-type">int</span> pid = Process.<span class="hljs-property">start</span>(<span class="hljs-string">&quot;android.app.ActivityThread&quot;</span>, <span class="hljs-literal">null</span>, uid, uid, gids, debugFlags, <span class="hljs-literal">null</span>);<br><br>  <span class="hljs-comment">// 액티비티 매니저 서비스의 mPidsSelfLocked 해시에 생성된 프로세스의 pid 값을 key로 해서 ProcessRecord 객체를 저장함.</span><br>  <span class="hljs-variable">this</span>.<span class="hljs-property">mPidsSelfLocked</span>.<span class="hljs-property">put</span>(pid, app);<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>ActivityManagerService 클래스 코드에는 두 개의 startProcessLocked() 메서드가 존재한다.  </p>
+<p>첫 번째 startProcessLocked() 메서드의 역할은 리모트 서비스를 실행하기 위해 새로 생성할 프로세스 정보를 포함하는 ProcessRecord 객체를 만들고, 이를 mProcessNames 큐에 삽입하는 것이다. 이 과정이 성공적으로 끝나면 두 번째 startProcessLocked() 메서드를 호출한다.  </p>
+<p>두 번째 startProcessLocked() 메서더의 역할은 Process 클래스의 start() 메서드를 통해 Zygote에게 android.app.ActivityThread 프로세스 생성을 요청하는 것이다.  </p>
+<h4 id="ActivityThread-클래스의-main-메서드-실행"><a href="#ActivityThread-클래스의-main-메서드-실행" class="headerlink" title="ActivityThread 클래스의 main() 메서드 실행"></a>ActivityThread 클래스의 main() 메서드 실행</h4><p>지금부터는 Zygote가 서비스 실행을 위해 액티비티 매니저 서비스가 요청한 ActivityThread 클래스를 새로운 프로세스 상에서 어떻게 실행하는지 알아본다.  </p>
+<p>클래스의 실행을 요청받으면 새로운 프로세스를 생성하고 그 위에 해당 클래스를 로드한 후 해당 클래스의 main() 메서드를 호출한다.  </p>
+<figure class="highlight arduino"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><code class="hljs arduino"><span class="hljs-keyword">public</span> <span class="hljs-keyword">final</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">ActivityThread</span> extends ClientTransactionHandler &#123;<br>    <span class="hljs-comment">// ApplicationThread() 생성</span><br>    <span class="hljs-keyword">final</span> ApplicationThread mAppThread = <span class="hljs-keyword">new</span> <span class="hljs-built_in">ApplicationThread</span>();<br><br>    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-type">static</span> <span class="hljs-keyword">final</span> <span class="hljs-type">void</span> <span class="hljs-title">main</span><span class="hljs-params">(<span class="hljs-type">String</span>[] args)</span> </span>&#123;<br>            <span class="hljs-built_in">Process</span>.<span class="hljs-built_in">setArgV0</span>(<span class="hljs-string">&quot;&lt;pre-initialized&gt;&quot;</span>);<br>            Looper.<span class="hljs-built_in">prepareMainLooper</span>(); <span class="hljs-comment">// Looper.prepareMainLooper() 메서드를 이용해서 메시지 큐를 생성</span><br>            ActivityThread thread = <span class="hljs-keyword">new</span> <span class="hljs-built_in">ActivityThread</span>(); <span class="hljs-comment">// ActivityThread 객체를 생성</span><br>            thread.<span class="hljs-built_in">attach</span>(<span class="hljs-literal">false</span>);<br>            Looper.<span class="hljs-built_in">loop</span>();<br>        &#125;<br><br>        <span class="hljs-comment">// 메시지 핸들러</span><br>        <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-type">void</span> <span class="hljs-title">handleMessage</span><span class="hljs-params">(Message msg)</span> </span>&#123;<br>           <span class="hljs-keyword">switch</span> (msg.what) &#123;<br>             :<br>             <span class="hljs-keyword">case</span> CREATE_SERVICE:<br>                   <span class="hljs-built_in">handleCreateService</span>((CreateServiceData)msg.obj);<br>                   <span class="hljs-keyword">break</span>;<br>             <span class="hljs-keyword">case</span> SERVICE_ARGS:<br>                   <span class="hljs-built_in">handleServiceArgs</span>((ServiceArgsData)msg.obj);<br>                   <span class="hljs-keyword">break</span>;<br>             <span class="hljs-keyword">case</span> STOP_SERVICE:<br>                   <span class="hljs-built_in">handleStopService</span>((IBinder)msg.obj);<br>                   <span class="hljs-keyword">break</span>;<br>             :<br>           &#125;<br>       &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>Looper는 각 스레드의 메시지 루프를 실행하는 클래스.</p>
+<p>ActivityThread 객체는 액티비티 매니저 서비스와의 상호작용을 통해 안드로이드 애플리케이션 프로세스의 메인 스레드 실행 및 액티비티 스케줄링 등을 수행한다.  </p>
+<p>attach() 메서드는 다음 그림과 같은 과정을 보인다.  </p>
+<p><img src="/images/post/JS7.png" srcset="/img/loading.gif" lazyload alt="JS7" title="JS7">  </p>
+<p>⑴ ActivityThread - ActivityManagerProxy 객체의 attachApplication() 프록시 메서드를 호출<br>⑵ ActivityManagerProxy 객체 - ActivityManagerNative 객체에 ATTACH_APPLICATION_TRANSACTION RPC 코드와 바인더 RPC 데이터를 전송<br>⑶ ActivityManagerNative 객체 - ActivityManagerService에 포함된 attachApplication() 스텁 메서드를 호출  </p>
+<p>코드를 바탕으로 attach() 메서드가 바인더 RPC를 통해 attachApplication()을 어떻게 호출하는지 알아보자.  </p>
+<h5 id="⑴-ActivityThread-attachApplication-프록시-메서드-호출"><a href="#⑴-ActivityThread-attachApplication-프록시-메서드-호출" class="headerlink" title="⑴ ActivityThread - attachApplication() 프록시 메서드 호출"></a>⑴ ActivityThread - attachApplication() 프록시 메서드 호출</h5><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">private</span> <span class="hljs-keyword">final</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">attach</span><span class="hljs-params">(<span class="hljs-type">boolean</span> system)</span> &#123;<br>    :<br>    <span class="hljs-keyword">if</span> (!system) &#123;<br>        <span class="hljs-type">IActivityManager</span> <span class="hljs-variable">mgr</span> <span class="hljs-operator">=</span> ActivityManagerNative.getDefault();<br>        <span class="hljs-keyword">try</span> &#123;<br>            mgr.attachApplication(mAppThread);<br>        &#125; <span class="hljs-keyword">catch</span> (RemoteException ex) &#123;<br>        &#125;<br>    &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>이 메서드의 주요 기능은 ActivityThread와 액티비티 매니저 서비스 간에 IActivityManager 인터페이스 기반의 바인더 RPC를 위한 연결을 설정하는 것이다. 바인더 RPC 연결이 설정되면 ActivityThread는 ActivityManagerProxy 객체를 통해 액티비티 매니저 서비스에게 특정 작업을 요청할 수 있다.  </p>
+<h5 id="⑵-ActivityManagerProxy-객체"><a href="#⑵-ActivityManagerProxy-객체" class="headerlink" title="⑵ ActivityManagerProxy 객체"></a>⑵ ActivityManagerProxy 객체</h5><figure class="highlight haskell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><code class="hljs haskell"><span class="hljs-title">public</span> void attachApplication(<span class="hljs-type">IApplicationThread</span> app)<br>&#123;<br>  <span class="hljs-type">Parcel</span> <span class="hljs-class"><span class="hljs-keyword">data</span> = <span class="hljs-type">Parcel</span>.obtain();</span><br>  <span class="hljs-type">Parcel</span> reply = <span class="hljs-type">Parcel</span>.obtain();<br>  <span class="hljs-class"><span class="hljs-keyword">data</span>.writeInterfaceToken(<span class="hljs-type">IActivityManager</span>.<span class="hljs-title">descriptor</span>);</span><br>  <span class="hljs-class"><span class="hljs-keyword">data</span>.writeStrongBinder(<span class="hljs-title">app</span>.<span class="hljs-title">asBinder</span>());</span><br>  mRemote.transact(<span class="hljs-type">ATTACH_APPLICATION_TRANSACTION</span>, <span class="hljs-class"><span class="hljs-keyword">data</span>, reply, 0);</span><br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>⑴ 에서 호출된 attachApplication() 프록시 메서드를 살펴보면, app 매개변수를 통해 전달받은 ApplicationThread에 대한 바인더 객체를 마샬링해서 ATTACH_APPLICATION_TRANSACTION RPC 코드와 바인더 RPC 데이터를 ActivityManagerNative 객체에 전달한다.  </p>
+<h5 id="⑶-ActivityManagerNative-객체-attachApplication-스텁-메서드를-호출"><a href="#⑶-ActivityManagerNative-객체-attachApplication-스텁-메서드를-호출" class="headerlink" title="⑶ ActivityManagerNative 객체 - attachApplication() 스텁 메서드를 호출"></a>⑶ ActivityManagerNative 객체 - attachApplication() 스텁 메서드를 호출</h5><figure class="highlight reasonml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><code class="hljs reasonml">public boolean on<span class="hljs-constructor">Transact(<span class="hljs-params">int</span> <span class="hljs-params">code</span>, Parcel <span class="hljs-params">data</span>, Parcel <span class="hljs-params">reply</span>, <span class="hljs-params">int</span> ?<span class="hljs-params">ags</span>)</span><br>&#123;<br>  switch (code) &#123;<br>    :<br>    case ATTACH_APPLICATION_TRANSACTION: &#123;<br>      IApplicationThread app = <span class="hljs-module-access"><span class="hljs-module"><span class="hljs-identifier">ApplicationThreadNative</span>.</span></span><span class="hljs-keyword">as</span><span class="hljs-constructor">Interface(<span class="hljs-params">data</span>.<span class="hljs-params">readStrongBinder</span>()</span>);<br>      attach<span class="hljs-constructor">Application(<span class="hljs-params">app</span>)</span>;<br>      return <span class="hljs-literal">true</span>;<br>    &#125;<br>    :<br>  &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>ActivityThread가 보낸 ATTACH_APPLICATION_TRANSACTION RPC 코드와 바인더 RPC 데이터는 ActivityManagerNative 객체의 onTransact() 메서드를 통해 처리된다.  </p>
+<p>지금까지의 과정을 정리하면 ActivityThread 객체는 attach() 메서드를 통해 액티비티 매니저 서비스가 자신을 제어할 수 있도록 바인더 RPC 연결을 설정한다. 연결이 설정되고 나면 액티비티 매니저 서비스의 attachApplication() 스텁 메서드가 호출된다.  </p>
+<h4 id="액티비티-매니저-서비스-attachApplication-스텁-메서드-처리"><a href="#액티비티-매니저-서비스-attachApplication-스텁-메서드-처리" class="headerlink" title="액티비티 매니저 서비스 - attachApplication() 스텁 메서드 처리"></a>액티비티 매니저 서비스 - attachApplication() 스텁 메서드 처리</h4><p>attachApplication() 스텁 메서드의 전체적인 동작 과정  </p>
+<p><img src="/images/post/JS8.png" srcset="/img/loading.gif" lazyload alt="JS8" title="JS8">  </p>
+<p>⑴ 액티비티 매니저 서비스 - ActivityManagerProxy 객체의 scheduleCreateService() 프록시 메서드 호출  </p>
+<p>⑵ ActivityManagerProxy 객체 - ActivityThread의 ActivityManagerNative 객체에 SCHEDULE_CREATE_SERVICE_TRANSACTION RPC 코드와 바인더 RPC 데이터 전송  </p>
+<p>⑶ ActivityManagerNative 객체 - ApplicationCreateService의 ApplicationThread 객체에 포함된 scheduleCreateService() 스텁 메서드 호출   </p>
+<p>⑷ ApplicationThread 객체 - ApplicationCreateService의 ActivityThread에 메시지큐를 이용해 CREATE_SERVICE 메시지 전달  </p>
+<p>⑸ ActivityThread 객체 - RemoteService 서비스 생성 및 서비스 생명주기에 따른 onCreate() 호출  </p>
+<h5 id="⑴-액티비티-매니저-서비스-scheduleCreateService-프록시-메서드-호출"><a href="#⑴-액티비티-매니저-서비스-scheduleCreateService-프록시-메서드-호출" class="headerlink" title="⑴ 액티비티 매니저 서비스 - scheduleCreateService() 프록시 메서드 호출"></a>⑴ 액티비티 매니저 서비스 - scheduleCreateService() 프록시 메서드 호출</h5><figure class="highlight reasonml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs reasonml">public final void attach<span class="hljs-constructor">Application(IApplicationThread <span class="hljs-params">thread</span>)</span><br>&#123;<br>  <span class="hljs-built_in">int</span> callingPid - <span class="hljs-module-access"><span class="hljs-module"><span class="hljs-identifier">Binder</span>.</span></span>get<span class="hljs-constructor">CallingPid()</span>;<br>  attach<span class="hljs-constructor">ApplicationLocked(<span class="hljs-params">thread</span>, <span class="hljs-params">callingPid</span>)</span>;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>이 메서드는 단순히 attachApplicationLocked() 메서드를 호출하는 역할을 한다.<br>thread인자는 ApplicationThreadProxy 객체, callingPid 인자는 attachApplication() 스텁 메서드를 호출한 프로세스의 pid.</p>
+<p>다음 코드는 attachApplicationLocked() 메서드의 주요 부분이다.  </p>
+<figure class="highlight arduino"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><code class="hljs arduino"><span class="hljs-comment">// thread는 ApplicationThreadProxy 객체를 가리킴</span><br><span class="hljs-function">pricate <span class="hljs-keyword">final</span> <span class="hljs-type">boolean</span> <span class="hljs-title">attachApplicationLocked</span><span class="hljs-params">(IApplicationThread thread, <span class="hljs-type">int</span> pid)</span></span><br><span class="hljs-function"></span>&#123;<br>  <span class="hljs-comment">// 생성된 ActivityThread의 pid 값을 가지는 ProcessRecord를 얻음</span><br>  ProcessRecord app;<br>  app = mPidsSelfLocked.<span class="hljs-built_in">get</span>(pid);<br><br>  <span class="hljs-comment">// ProcessRecord와 ApplicationThreadProxy 객체를 연결함</span><br>  app.thread = thread;<br><br>  <span class="hljs-comment">// 실행할 서비스의 ServiceRecord를 얻음</span><br>  ServiceRecord sr = null;<br><br>  <span class="hljs-keyword">for</span> (<span class="hljs-type">int</span> i=<span class="hljs-number">0</span>; i&lt;mPendingServices.<span class="hljs-built_in">size</span>(); i++) &#123;<br>    sr = mPendingServices.<span class="hljs-built_in">get</span>(i); <span class="hljs-comment">// 큐에 저장했던 RemoteService에 대한 ServiceRecord 객체를 얻는다.  </span><br>    mPendingServices.<span class="hljs-built_in">remove</span>(i);<br>    i--;<br><br>    <span class="hljs-built_in">realStartServiceLocked</span>(sr, app); <span class="hljs-comment">// ProcessRecord와 ServiceRecord 값을 realStartServiceLocked() 메서드로 전달한다.  </span><br>  &#125;<br><br>  <span class="hljs-keyword">return</span> <span class="hljs-literal">true</span>;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+
+<p><img src="/images/post/JS9.png" srcset="/img/loading.gif" lazyload alt="JS9" title="JS9">  </p>
+<figure class="highlight reasonml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs reasonml"><span class="hljs-keyword">private</span> final void real<span class="hljs-constructor">StartServiceLocked(ServiceRecord <span class="hljs-params">r</span>, ProcessRecord <span class="hljs-params">app</span>)</span><br>&#123;<br>  app.thread.schedule<span class="hljs-constructor">CreateService(<span class="hljs-params">r</span>, <span class="hljs-params">r</span>.<span class="hljs-params">serviceInfo</span>)</span>;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>내부적으로 app.thread.scheduleCreateService() 메서드를 호출한다. app.thread에는 서비스 실행을 요청한 ActivityThread를 제어하기 위한 ApplicationThreadProxy 객체가 저장돼 있다.<br>app.thread.scheduleCreateService() 메서드는 ApplicationThreadProxy의 scheduleCreateService() 메서드를 호출한다.  </p>
+<h5 id="⑵-ActivityManagerProxy-객체-바인더-RPC-데이터-전송"><a href="#⑵-ActivityManagerProxy-객체-바인더-RPC-데이터-전송" class="headerlink" title="⑵ ActivityManagerProxy 객체 - 바인더 RPC 데이터 전송"></a>⑵ ActivityManagerProxy 객체 - 바인더 RPC 데이터 전송</h5><figure class="highlight haskell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs haskell"><span class="hljs-title">public</span> final void scheduleCreateService(<span class="hljs-type">IBinder</span> token, <span class="hljs-type">ServiceInfo</span> info)<br>&#123;<br>  <span class="hljs-type">Parcel</span> <span class="hljs-class"><span class="hljs-keyword">data</span> = <span class="hljs-type">Parcel</span>.obtain();</span><br>  <span class="hljs-class"><span class="hljs-keyword">data</span>.writeStrongBinder(<span class="hljs-title">token</span>);</span><br>  info.writeToParcel(<span class="hljs-class"><span class="hljs-keyword">data</span>, 0);</span><br>  mRemote.transact(<span class="hljs-type">SCHEDULE_CREATE_SERVICE_TRANSACTION</span>, <span class="hljs-class"><span class="hljs-keyword">data</span>, null, <span class="hljs-type">IBinder</span>.<span class="hljs-type">FLAG_ONEWAY</span>);</span><br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>scheduleCreateService() 프록시 메서드는 생성할 서비스(여기서는 RemoteService)에 대한 정보를 포함한 ServiceInfo 객체를 SCHEDULE_CREATE_SERVICE_TRANSACTION RPC 코드와 RPC 데이터를 통해 ApplicationThreadNative 객체에 전달한다.  </p>
+<h5 id="⑶-ActivityManagerNative-객체-scheduleCreateService-스텁-메서드-호출"><a href="#⑶-ActivityManagerNative-객체-scheduleCreateService-스텁-메서드-호출" class="headerlink" title="⑶ ActivityManagerNative 객체 - scheduleCreateService() 스텁 메서드 호출"></a>⑶ ActivityManagerNative 객체 - scheduleCreateService() 스텁 메서드 호출</h5><figure class="highlight reasonml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><code class="hljs reasonml">public boolean on<span class="hljs-constructor">Transact(<span class="hljs-params">int</span> <span class="hljs-params">code</span>, Parcel <span class="hljs-params">data</span>, Parcel <span class="hljs-params">reply</span>, <span class="hljs-params">int</span> <span class="hljs-params">flags</span>)</span><br>&#123;<br>  switch(code) &#123;<br>    :<br>    case SCHEDULE_CREATE_SERVICE_TRANSACTION: &#123;<br>      IBinder token = data.read<span class="hljs-constructor">StrongBinder()</span>;<br>      serviceInfo info = <span class="hljs-module-access"><span class="hljs-module"><span class="hljs-identifier">ServiceInfo</span>.</span><span class="hljs-module"><span class="hljs-identifier">CREATOR</span>.</span></span>create<span class="hljs-constructor">FromParcel(<span class="hljs-params">data</span>)</span>;<br>      schedule<span class="hljs-constructor">CreateService(<span class="hljs-params">token</span>, <span class="hljs-params">info</span>)</span>;<br>      return <span class="hljs-literal">true</span>;<br>    &#125;<br>    :<br>  &#125;<br><br>  return super.on<span class="hljs-constructor">Transact(<span class="hljs-params">code</span>, <span class="hljs-params">data</span>, <span class="hljs-params">reply</span>, ?<span class="hljs-params">ags</span>)</span>;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>ApplicationThreadProxy 객체가 data 변수에 마샬링해서 전달한 ServiceRecord 객체(Binder 객체를 확장한 객체)와 ServiceInfo 객체를 언마샬링한 다음 각각 token과 info 변수에 저장한다. 그리고 이렇게 바인더 RPC로부터 수신한 데이터를 저장한 token과 info를 각각 ActivityThread의 scheduleCreateService() 스텁 메서드의 인자로 넘긴다.  </p>
+<h5 id="⑷-ApplicationThread-객체-ActivityThread로-CREATE-SERVICE-메시지-전달"><a href="#⑷-ApplicationThread-객체-ActivityThread로-CREATE-SERVICE-메시지-전달" class="headerlink" title="⑷ ApplicationThread 객체 - ActivityThread로 CREATE_SERVICE 메시지 전달"></a>⑷ ApplicationThread 객체 - ActivityThread로 CREATE_SERVICE 메시지 전달</h5><figure class="highlight reasonml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs reasonml">public final void schedule<span class="hljs-constructor">CreateService(IBinder <span class="hljs-params">token</span>, ServiceInfo <span class="hljs-params">info</span>)</span><br>&#123;<br>  CreateServiceData s = <span class="hljs-keyword">new</span> <span class="hljs-constructor">CreateServiceData()</span>;<br>  s.token = token;<br>  s.info = info;<br>  queue<span class="hljs-constructor">OrSendMessage(H.CREATE_SERVICE, <span class="hljs-params">s</span>)</span>;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>scheduleCreateService() 스텁 메서드는 인자를 이용해 CreateServiceData라는 객체를 만든 다음 이를 ActivityThread 메시지 큐에 CREATE_SERVICE 메시지로 전달한다.  </p>
+<p>지금까지의 과정을 살펴보면 다음과 같이 나타낼 수 있다.  </p>
+<p><img src="/images/post/JS10.png" srcset="/img/loading.gif" lazyload alt="JS10" title="JS10">  </p>
+<p>ApplicationThread는 액티비티 매니저 서비스의 제어 명령을 바인더 RPC로 수신하기 위한 용도로 사용되고,<br>실제 액티비티 매니저 서비스로부터 요청받은 서비스를 실행하거나 생명주기를 관리하는 일은 ActivityThread가 처리하기 때문이다.  </p>
+<h5 id="⑸-ActivityThread-객체-서비스-생성-및-서비스의-onCreate-호출"><a href="#⑸-ActivityThread-객체-서비스-생성-및-서비스의-onCreate-호출" class="headerlink" title="⑸ ActivityThread 객체 - 서비스 생성 및 서비스의 onCreate() 호출"></a>⑸ ActivityThread 객체 - 서비스 생성 및 서비스의 onCreate() 호출</h5><p>ActivityThread의 메시지 핸들러 코드 중 CREATE_SERVICE 메시지를 처리하는 주요 부분이며, 실질적인 처리는 handleCreateService() 메서드에서 이루어진다.</p>
+<figure class="highlight reasonml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><code class="hljs reasonml">public void handle<span class="hljs-constructor">Message(Message <span class="hljs-params">msg</span>)</span><br>&#123;<br>  switch (msg.what) &#123;<br>    :<br>    case CREATE_SERVICE:<br>    handle<span class="hljs-constructor">CreateService((CreateServiceData)</span>msg.obj);<br>    break;<br>    :<br>  &#125;<br>&#125;<br><br><span class="hljs-keyword">private</span> final void handle<span class="hljs-constructor">CreateService(CreateServiceData <span class="hljs-params">data</span>)</span><br>&#123;<br>  <span class="hljs-comment">// 서비스 인스턴스 생성</span><br>  PackageInfo packageInfo = get<span class="hljs-constructor">PackageInfoNoCheck(<span class="hljs-params">data</span>.<span class="hljs-params">info</span>.<span class="hljs-params">applicationInfo</span>)</span>;<br>  Service service = null;<br>  java.lang.ClassLoader cl = packageInfo.get<span class="hljs-constructor">ClassLoader()</span>;<br>  service = (Service) cl.load<span class="hljs-constructor">Class(<span class="hljs-params">data</span>.<span class="hljs-params">info</span>.<span class="hljs-params">name</span>)</span>.<span class="hljs-keyword">new</span><span class="hljs-constructor">Instance()</span>;<br><br>  <span class="hljs-comment">// 서비스 생명주기 시작</span><br>  service.on<span class="hljs-constructor">Create()</span>;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+
+
+<h3 id="정리"><a href="#정리" class="headerlink" title="정리"></a>정리</h3><p><img src="/images/post/JS11.png" srcset="/img/loading.gif" lazyload alt="JS11" title="JS11">  </p>
+<p>⑴ Controller 액티비티는 RemoteService 서비스를 실행하기 위해 startService() API를 통해 액티비티 매니저 서비스에 RemoteService 서비스 실행을 요청한다.  </p>
+<p>⑵ 요청받은 서비스가 리모트 서비스인 경우 액티비티 매니저 서비스는 Zygote에게 서비스를 별도의 독립 프로세스로 실행시키기 위해 ActivityThread 생성을 요청한다.  </p>
+<p>⑶ Zygote에 의해 생성된 ActivityThread는 attachApplication() 프록시 메서드를 통해 액티비티 매니저 서비스에게 자신을 등록한다. 이를 통해 액티비티 매니저 서비스는 생성도니 ActivityThread를 제어할 수 있다.  </p>
+<p>⑷ 액티비티 매니저 서비스는 ⑴에서 요청받은 RemoteService 생성을 ActivityThread에 요청한다.  </p>
+<p>⑸ ActivityThread는 요청했던 RemoteService 서비스의 인스턴스를 생성한 다음 이 서비스의 onCreate() 콜백 함수를 호출한다.  </p>
+
+                
+              </div>
+            
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+    <div class="post-meta mr-3 d-flex align-items-center">
+      <i class="iconfont icon-category"></i>
+      
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/categories/Android/" class="category-chain-item">Android</a>
+  
+  
+
+      </span>
+    
+  
+</span>
+
+    </div>
+  
+  
+    <div class="post-meta">
+      <i class="iconfont icon-tags"></i>
+      
+        <a href="/tags/Android/" class="print-no-link">#Android</a>
+      
+        <a href="/tags/%EC%9D%B8%EC%82%AC%EC%9D%B4%EB%93%9C-%EC%95%88%EB%93%9C%EB%A1%9C%EC%9D%B4%EB%93%9C/" class="print-no-link">#인사이드 안드로이드</a>
+      
+    </div>
+  
+</div>
+
+
+              
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/PackageManager1/" title="[안드로이드 프레임워크 개선] - PackageManager">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">[안드로이드 프레임워크 개선] - PackageManager</span>
+                        <span class="visible-mobile">Previous</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/chapter10/" title="[인사이드 안드로이드] 챕터 10 - 자바 서비스 프레임워크">
+                        <span class="hidden-mobile">[인사이드 안드로이드] 챕터 10 - 자바 서비스 프레임워크</span>
+                        <span class="visible-mobile">Next</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header">
+    <i class="iconfont icon-list"></i>
+    <span>Table of Contents</span>
+  </p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">검색</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">키워드</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <span>Kxxxgs</span> <i class="iconfont icon-love"></i> 
+    </div>
+  
+  
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.4/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.20.1/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    window.tocbot.init(Object.assign({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      scrollSmooth    : true,
+      includeTitleTags: true,
+      headingsOffset  : -boardTop,
+    }, CONFIG.toc));
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('tocbot' in window) {
+        tocbot.refresh();
+        var toc = jQuery('#toc');
+        if (toc.length === 0 || !tocbot) {
+          return;
+        }
+        if (toc.find('.toc-list-item').length > 0) {
+          toc.css('visibility', 'visible');
+        }
+      }
+    });
+  });
+</script>
+
+
+  <script src=https://lib.baomitu.com/clipboard.js/2.0.11/clipboard.min.js></script>
+
+  <script>Fluid.plugins.codeWidget();</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/4.3.1/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('anchors' in window) {
+        anchors.removeAll();
+        var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+        var res = [];
+        for (var item of el) {
+          res.push('.markdown-body > ' + item.trim());
+        }
+        if (CONFIG.anchorjs.placement === 'left') {
+          anchors.options.class = 'anchorjs-link-left';
+        }
+        anchors.add(res.join(', '));
+      }
+    });
+  });
+</script>
+
+
+  <script  src="/js/local-search.js" ></script>
+
+
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">Blog works best with JavaScript enabled</div>
+  </noscript>
+</body>
+</html>

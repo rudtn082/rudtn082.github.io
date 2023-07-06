@@ -1,0 +1,617 @@
+
+
+<!DOCTYPE html>
+<html lang="ko" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/fluid.png">
+  <link rel="icon" href="/img/fluid.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="kxxxgs">
+  <meta name="keywords" content="">
+  
+    <meta name="description" content="[인사이드 안드로이드]Chapter3 - init 프로세스(1)init 프로세스의 실행 과정먼저 커널소스를 받기위해 깃을 사용했다.   1234sudo apt-get install git  git clone https:&#x2F;&#x2F;android.googlesource.com&#x2F;kernel&#x2F;common.git kernel  cd kernel  git branch -r">
+<meta property="og:type" content="article">
+<meta property="og:title" content="[인사이드 안드로이드] 챕터 3 - init 프로세스(1)">
+<meta property="og:url" content="http://kxxxgs.github.io/chapter3/index.html">
+<meta property="og:site_name" content="kxxxgs">
+<meta property="og:description" content="[인사이드 안드로이드]Chapter3 - init 프로세스(1)init 프로세스의 실행 과정먼저 커널소스를 받기위해 깃을 사용했다.   1234sudo apt-get install git  git clone https:&#x2F;&#x2F;android.googlesource.com&#x2F;kernel&#x2F;common.git kernel  cd kernel  git branch -r">
+<meta property="og:locale" content="ko_KR">
+<meta property="og:image" content="http://kxxxgs.github.io/images/post/ch3.PNG">
+<meta property="article:published_time" content="2019-03-21T15:00:00.000Z">
+<meta property="article:modified_time" content="2023-07-06T15:45:44.936Z">
+<meta property="article:author" content="kxxxgs">
+<meta property="article:tag" content="Android">
+<meta property="article:tag" content="인사이드 안드로이드">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="http://kxxxgs.github.io/images/post/ch3.PNG">
+  
+  
+  
+  <title>[인사이드 안드로이드] 챕터 3 - init 프로세스(1) - kxxxgs</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1749284_hj8rtnfg7um.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_lbnruvf0jn.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"kxxxgs.github.io","root":"/","version":"1.9.5","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":false},"image_zoom":{"enable":false,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":{"measurement_id":null},"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false}},"search_path":"/local-search.xml","include_content_in_search":true};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+  
+
+
+  
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>Kxxxgs</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/">
+                <i class="iconfont icon-home-fill"></i>
+                <span>Home</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/">
+                <i class="iconfont icon-category-fill"></i>
+                <span>Categories</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/">
+                <i class="iconfont icon-user-fill"></i>
+                <span>About</span>
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              <i class="iconfont icon-search"></i>
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">
+              <i class="iconfont icon-dark" id="color-toggle-icon"></i>
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/img/default.png') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="[인사이드 안드로이드] 챕터 3 - init 프로세스(1)"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2019-03-22 00:00" pubdate>
+          2019년 3월 22일 오전
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          6k words
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          51 mins
+        
+      </span>
+    
+
+    
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <h1 id="seo-header">[인사이드 안드로이드] 챕터 3 - init 프로세스(1)</h1>
+            
+            
+              <div class="markdown-body">
+                
+                <h1 id="인사이드-안드로이드"><a href="#인사이드-안드로이드" class="headerlink" title="[인사이드 안드로이드]"></a>[인사이드 안드로이드]</h1><h2 id="Chapter3-init-프로세스-1"><a href="#Chapter3-init-프로세스-1" class="headerlink" title="Chapter3 - init 프로세스(1)"></a>Chapter3 - init 프로세스(1)</h2><h3 id="init-프로세스의-실행-과정"><a href="#init-프로세스의-실행-과정" class="headerlink" title="init 프로세스의 실행 과정"></a>init 프로세스의 실행 과정</h3><p>먼저 커널소스를 받기위해 깃을 사용했다.  </p>
+<figure class="highlight awk"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs awk">sudo apt-get install git  <br>git clone https:<span class="hljs-regexp">//</span>android.googlesource.com<span class="hljs-regexp">/kernel/</span>common.git kernel  <br>cd kernel  <br>git branch -r  <br></code></pre></td></tr></table></figure>
+
+<p>위의 명령어로 브랜치 정보를 확인해서, 나는 3.18버전을 체크아웃 받았다.  </p>
+<figure class="highlight apache"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs apache"><span class="hljs-attribute">git</span> checkout origin/android-<span class="hljs-number">3</span>.<span class="hljs-number">18</span>  <br></code></pre></td></tr></table></figure>
+
+<h4 id="init-post-함수"><a href="#init-post-함수" class="headerlink" title="init_post()함수"></a>init_post()함수</h4><p>책에서는 init_post()함수에 대해서 설명했는데, 내가 3.18버전을 받아서 그런지 비슷한 코드의 함수명이 달랐다.<br>3.18에서는 __ref형을 반환하는 kernel_init() 함수.  </p>
+<p><img src="/images/post/ch3.PNG" srcset="/img/loading.gif" lazyload alt="Alt text" title="ch3">                                                </p>
+<p>책과 다른 점이 있었는데, run_init_process의 리턴값을 받아서 false일 경우에 바로 종료시키는 구문이 추가되었다.<br>또한 &#x2F;sbin, &#x2F;etc, &#x2F;bin 디렉터리에서 init파일을 못찾았을 경우 커널 패닉이 일어날 경우에 대한 메시지가 있었다.<br>이 과정을 정상적으로 수행하면 init 프로세스를 실행한다.  </p>
+<h3 id="init-프로세스의-소스-코드-분석"><a href="#init-프로세스의-소스-코드-분석" class="headerlink" title="init 프로세스의 소스 코드 분석"></a>init 프로세스의 소스 코드 분석</h3><p>main()에서 모든 프로세스의 부모인 init 프로세스는 자신이 생성한 프로세스가 종료됐을 때 발생하는 SIGCHLD 시그널을 처리할 핸들러를 등록한다.<br><em>리눅스의 프로세스들은 정보 교환으로 메시지를 주고 받는데 이를 시그널이라 하고, 처리하기 위한 루틴을 시그널 핸들러라고 한다.</em>  </p>
+<figure class="highlight lisp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs lisp">(<span class="hljs-name">sigaction</span> 구조체인 act에 값을 넣음.)  <br>sigaction(<span class="hljs-name">SIGCHLD</span>, <span class="hljs-symbol">&amp;act</span>, <span class="hljs-number">0</span>)<span class="hljs-comment">;  </span><br></code></pre></td></tr></table></figure>
+
+<p>init 프로세스는 시그널 핸들러를 등록하고 부팅에 필요한 디렉터리를 생성하고 마운트한다.<br>이렇게 생성된 &#x2F;dev, &#x2F;proc, &#x2F;sys와 같은 디렉터리는 init 프로세스가 동작 중에 생성하고 시스템이 종료되면 다시 사라진다.  </p>
+<p>디렉터리가 생성된 이후에 <strong>open_devnull_stdio()</strong> 함수를 통해 실행 로그를 출력하기 위한 장치를 생성한다. 입출력에 관련된 파일이 모두 <strong><strong>null</strong></strong> 장치로 변경되어 open_devnull_stdio() 함수를 수행한 init 프로세스는 표준 입출력을 통해 메시지를 출력할 수 없다. 해당 프로세스들은 <strong>log_init()</strong> 함수를 통해 로그 메시지를 출력하기 위한 새로운 출력 장치를 제공한다. log_init() 함수는 <strong><strong>kmsg</strong></strong> 디바이스 노드 파일을 생성한다. 이는 커널의 메시지 출력 함수인 printk() 함수를 사용하게 하고 이 장치를 통해 로그 메시지를 출력한다.  </p>
+<p>안드로이드는 init.rc와 init.{hardware}.rc 파일을 이용해 실행 파일과 환경 변수를 정의한다.<br><strong>init.rc</strong> 파일은 안드로이드의 공통적인 환경설정 및 프로세스<br><strong>init.{hardware}.rc</strong> 파일은 플랫폼에 따라 특화된 프로세스나 환경 설정 등을 정의한다.<br>출력 장치를 생성한 이후 init.rc 파일을 파싱하게된다.<br>파싱한 후 서비스 리스트와 액션 리스트를 연결리스트 형태로 구성한다.  </p>
+<p><strong>QEMU</strong>는 PC를 위한 오픈소스 에뮬레이터이다. init.rc을 파싱한 후 에뮬레이터 환경을 위해 QEMU 초기화를 한다.  </p>
+<p>다음은 init.rc 파일을 분석했던 것 처럼 init.{hardware}.rc 파일을 파싱한다.<br>서비스 리스트와 액션리스트를 생성하여 init.rc 파일에서 생성했던 서비스 리스트와 액션리스트에 각각 추가된다.  </p>
+<p>init 프로세스는 <strong>‘early-init, init, early-boot, boot’</strong> 섹션에 포함된 명령어들을 순서대로 실행한다.<br>action_for_each_trigger()함수를 이용해 early-init 섹션의 명령어들을 실행 큐인 action_add_queue_tail 큐에 저장하고 drain_action_queue()를 이용해 명령어를 실행한다.  </p>
+<figure class="highlight reasonml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs reasonml">action<span class="hljs-constructor">_for_each_trigger(<span class="hljs-string">&quot;early-init&quot;</span>, <span class="hljs-params">action_add_queue_tail</span>)</span>;  <br>drain<span class="hljs-constructor">_action_queue()</span>;  <br></code></pre></td></tr></table></figure>
+
+<p>다음으로 init 프로세스는 <strong>device_init()</strong> 함수를 통해 정적 디바이스 노드를 생성하고 <strong>property_init()</strong> 함수를 통해 프로퍼티 서비스를 초기화 한다.<br><em>프로퍼티 영역은 모든 프로세스에서 시스템의 설정 값을 공유하기 위해 제공된다</em>  </p>
+<p>다음 단계에서 안드로이드 부팅 로고를 출력한다.  </p>
+<p><strong>property_set()</strong> 함수를 이용하여 앞서 생성한 프로퍼티 영역에 시스템 운용에 필요한 초기 값을 설정한다.<br>다음은 init 프로세스의 주요 기능 중 하나인 프로퍼티 서비스를 시작한다.  </p>
+<figure class="highlight ini"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs ini"><span class="hljs-attr">property_set_fd</span> = start_property_service()<span class="hljs-comment">;  </span><br></code></pre></td></tr></table></figure>
+
+<p>init 프로세스는 자식 프로세스의 종료 처리를 위한 핸들러를 따로 정의했다.<br><strong>socketpair()</strong> 함수를 통해 서로 연결된 소켓 쌍 <strong>signal_fd, signal_recv_fd</strong>을 생성하고<br>signal_fd와 signal_recv_fd의 값을 1로 설정한다.<br>이벤트 처리 핸들러에서 signal_recv_fd의 값을 감시하다가 1로 설정되면서 자식 프로세스 종료 처리 핸들러를 호출한다.  </p>
+<p>다음으로 <strong>early-boot, boot, property</strong> 섹션에 해당하는 명령어를 실행한다.</p>
+<p>다음으로 이벤트 처리 루프에 들어가기 전 감시할 이벤트 설정을 한다.<br>poll()함수에서 이벤트를 기다리고 이벤트가 발생하면 poll() 함수를 빠져나와 이벤트를 처리한다.<br><strong>① 디바이스 노드 생성 ② 프로퍼티 서비스 요청 ③ SIGCHLD 시그널 처리</strong><br>이 세가지를 위한 파일 디스크립터를 등록하고, 아래와 같은 <strong>이벤트 처리 루프</strong>에서 poll() 함수의 인자로 넘겨져 이벤트를 감시한다.  </p>
+<figure class="highlight reasonml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><code class="hljs reasonml"><span class="hljs-keyword">for</span>(;;) &#123;  <br>    drain<span class="hljs-constructor">_action_queue()</span>;  <span class="hljs-comment">// 이벤트 처리 루프를 한번 수행 한 이후 액션 리스트, 서비스 리스트에서 실행되지 않은 명령들을 확인하고 실행.  </span><br>    restart<span class="hljs-constructor">_processes()</span>;  <span class="hljs-comment">// 자식 프로세스가 종료됐을 때 자식 프로세스 재시작 or 종료.  </span><br><br>    nr = poll(ufds, fd_count, timeout);  <span class="hljs-comment">// 등록한 파일 디스크립터에 발생한 이벤트를 기다린다. 이벤트가 발생하면 ufds에 이벤트 정보가 담김.  </span><br><br>     <span class="hljs-keyword">if</span> (ufds<span class="hljs-literal">[<span class="hljs-number">2</span>]</span>.revents<span class="hljs-operator"> == </span>POLLIN) &#123;  <span class="hljs-comment">//  자식 프로세스가 종료되어 SIGCHLD 시그널이 발생하면 POLLIN 이벤트 등록.  </span><br>         <span class="hljs-comment">/* we got a SIGCHLD - reap and restart as needed */</span>  <br>         read(signal_recv_fd, tmp, sizeof(tmp));  <br>         <span class="hljs-keyword">while</span> (!wait<span class="hljs-constructor">_for_one_process(0)</span>);  <br>         continue;  <br>     &#125;  <br><br>     <span class="hljs-keyword">if</span> (ufds<span class="hljs-literal">[<span class="hljs-number">0</span>]</span>.revents<span class="hljs-operator"> == </span>POLLIN)  <br>         handle<span class="hljs-constructor">_device_fd(<span class="hljs-params">device_fd</span>)</span>; <span class="hljs-comment">// 핫플러그 장치가 삽입됐을 때 디바이스 노드 파일 생성.  </span><br>     <span class="hljs-keyword">if</span> (ufds<span class="hljs-literal">[<span class="hljs-number">1</span>]</span>.revents<span class="hljs-operator"> == </span>POLLIN)  <br>         handle<span class="hljs-constructor">_property_set_fd(<span class="hljs-params">property_set_fd</span>)</span>;  <br>     <span class="hljs-keyword">if</span> (ufds<span class="hljs-literal">[<span class="hljs-number">3</span>]</span>.revents<span class="hljs-operator"> == </span>POLLIN)  <br>         handle<span class="hljs-constructor">_keychord(<span class="hljs-params">keychord_fd</span>)</span>;  <br> &#125;  <br></code></pre></td></tr></table></figure>
+
+<h3 id="init-rc-파일-분석-및-실행"><a href="#init-rc-파일-분석-및-실행" class="headerlink" title="init.rc 파일 분석 및 실행"></a>init.rc 파일 분석 및 실행</h3><p>init.{hardware}.rc와 init.rc가 동일하게 처리하기 때문에 init.rc에 대해서만 분석한다.<br><strong>init 프로세스는 안드로이드를 빌드해야 생성되지만, init.rc 파일은 안드로이드 플랫폼의 소스코드에서 살펴볼 수 있다.</strong><br><strong>&#x2F;rootdir&#x2F;init.rc</strong>  </p>
+<p>init.rc 파일의 내용은 크게 ‘on’ 키워드의 액션 리스트, ‘service’ 키워드의 서비스 리스트로 나뉜다.<br><strong>액션 리스트 &#x3D; 시스템 환경 변수, 부팅 시 필요한 디렉터리 생성, 퍼미션 지정</strong><br><strong>서비스 리스트 &#x3D; 부팅시 실행하는 프로세스 기술</strong>  </p>
+<h4 id="액션-리스트"><a href="#액션-리스트" class="headerlink" title="액션 리스트"></a>액션 리스트</h4><p>액션 리스트는 <strong>‘on init’</strong> 섹션에서 환경변수를 등록하고, 디렉터리 생성 및 마운트한다.<br>안드로이드의 루트 파일 시스템 구조는 크게 <strong>shell 유틸리티</strong>, 라이브러리, 기본 애플리케이션을 제공하는 <strong>system 디렉터리</strong>, 개발자가 탑재한 사용자 애들리케이션이나 사용자 데이터를 저장하는 <strong>data 디렉터리로</strong> 나뉜다.<br>마운트 부분에서는 &#x2F;system과 &#x2F;data 디렉터리를 마운트한다.  </p>
+<p><strong>‘on boot’</strong> 섹션에서는 애플리케이션 종료 조건 설정, 애플리케이션 구동에 필요한 디렉터리 및 파일 퍼미션 설정 등을 한다.<br>애플리케이션 종료 조건 설정부분에서 애플리케이션 별 <strong>OOM(Out Of Memory)</strong> 조정 값(Adjustment Value)을 지정한다.<br>OOM은 커널 상에서 메모리를 모니터링하면서 메모리가 부족할 때 애플리케이션을 종료시키는 역할을 한다.<br><em>ADJ값이 높을수록 종료 우선순위가 높다.</em>  </p>
+<p><strong>‘on property’</strong> 섹션에서는 프로퍼티 값이 변경될 경우 실행되는 명령이 기술돼 있다.</p>
+<h4 id="서비스-리스트"><a href="#서비스-리스트" class="headerlink" title="서비스 리스트"></a>서비스 리스트</h4><p>**’service’**섹션은 앞서 말한듯이 init 프로세스가 실행시키는 프로세스를 기술한다.<br><em>해당 프로세스에는 부팅음을 출력하는 일회성 프로그램 또는 백그라운드의 애플리케이션이나 시스템 운용에 관여하는 데몬 프로세스가 있다.</em>  </p>
+<p>‘service’ 섹션의 프로세스는 모드 서비스 리스트에 등록되며, init 프로세스가 실행되면서 서비스 리스트에 등록된 프로세스를 순차적으로 실행한다.  </p>
+<h4 id="init-rc-파싱-코드-분석"><a href="#init-rc-파싱-코드-분석" class="headerlink" title="init.rc 파싱 코드 분석"></a>init.rc 파싱 코드 분석</h4><p>parse_config_file() 함수는 인자로 전달되는 파일을 읽고(read_file()), 각 문자열을 파싱한다.(parse_config())<br><em>&#x2F;init&#x2F;parser.c 파일의 parse_config_file() 함수</em>  </p>
+<figure class="highlight reasonml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><code class="hljs reasonml"><span class="hljs-built_in">int</span> parse<span class="hljs-constructor">_config_file(<span class="hljs-params">const</span> <span class="hljs-params">char</span> <span class="hljs-operator">*</span><span class="hljs-params">fn</span>)</span>  <br>&#123;  <br>    <span class="hljs-built_in">char</span> *data;  <br>    data = read<span class="hljs-constructor">_file(<span class="hljs-params">fn</span>, 0)</span>;  <span class="hljs-comment">// 파일을 읽고  </span><br>    <span class="hljs-keyword">if</span> (!data) return -<span class="hljs-number">1</span>;  <br>    parse<span class="hljs-constructor">_config(<span class="hljs-params">fn</span>, <span class="hljs-params">data</span>)</span>;  <span class="hljs-comment">// 문자열 파싱  </span><br>    <span class="hljs-constructor">DUMP()</span>;  <br>    return <span class="hljs-number">0</span>;  <br>&#125;  <br></code></pre></td></tr></table></figure>
+
+<p><strong>parse_config()</strong> 함수는 아래 코드와 같이 인자로 전달된 파일의 끝까지 각 라인을 파싱한다.<br><strong>next_token()</strong> 함수로 문자열을 라인 단위로 나눈 후 <strong>lookup_keyword()</strong> 함수를 호출한다.<br>lookup_keyword() 함수는 init.rc 파일의 각 라인에서 첫 단어에 해당하는 <strong>keyword_list 구조체 배열</strong>에서 번호를 반환한다.<br>이후에 배열 내 flag가 SECTION인지 판단하는데, SECTION flag는 “on”, “service” 키워드만 존재하기 때문에 서비스 리스트만 <strong>parse_new_section()</strong> 함수를 수행한다.<br>parse_new_section() 함수를 수행하고 나면 액션 리스트와 서비스 리스트가 완성된다.  </p>
+<figure class="highlight reasonml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><code class="hljs reasonml">static void parse<span class="hljs-constructor">_config(<span class="hljs-params">const</span> <span class="hljs-params">char</span> <span class="hljs-operator">*</span><span class="hljs-params">fn</span>, <span class="hljs-params">char</span> <span class="hljs-operator">*</span><span class="hljs-params">s</span>)</span>  <br>&#123;  <br>    <span class="hljs-keyword">for</span> (;;) &#123;  <br>        switch (next<span class="hljs-constructor">_token(&amp;<span class="hljs-params">state</span>)</span>) &#123; <span class="hljs-comment">// 문자열을 라인 단위로 나눈다.  </span><br>        case T_NEWLINE:  <br>            <span class="hljs-keyword">if</span> (nargs) &#123;  <br>                <span class="hljs-built_in">int</span> kw = lookup<span class="hljs-constructor">_keyword(<span class="hljs-params">args</span>[0])</span>; <span class="hljs-comment">// 구조체 배열에서 번호를 반환한다.  </span><br>                <span class="hljs-keyword">if</span> (kw<span class="hljs-constructor">_is(<span class="hljs-params">kw</span>, SECTION)</span>) &#123; <span class="hljs-comment">// flag가 SECTION인지 확인한다.  </span><br>                    state.parse<span class="hljs-constructor">_line(&amp;<span class="hljs-params">state</span>, 0, 0)</span>; <span class="hljs-comment">// 서비스 리스트만  </span><br>                    parse<span class="hljs-constructor">_new_section(&amp;<span class="hljs-params">state</span>, <span class="hljs-params">kw</span>, <span class="hljs-params">nargs</span>, <span class="hljs-params">args</span>)</span>; <span class="hljs-comment">// parse_new_section() 함수를 수행한다.  </span><br>                &#125;  <br>            &#125;  <br>        &#125;  <br>    &#125;  <br>&#125;  <br></code></pre></td></tr></table></figure>
+
+<p>각 리스트는 <strong>KEYWORD 매크로</strong>를 사용해 생성된다.<br>KEYWORD 매크로는 parse.c와 keyword.h에 정의돼 있다.<br><strong>parse.c에 정의된 KEYWORD 매크로 &#x3D; KEYWORD 리스트를 keyword_list 구조체 배열로 변환</strong><br><strong>keyword.h에 정의된 KEYWORD 매크로 &#x3D; KEYWORD 리스트들을 1번부터 순서대로 번호 할당</strong>  </p>
+<p><em>parse.c에 정의된 KEYWORD 매크로</em><br>COMMAND 그룹은 init 프로세스가 실행하는 명령어들을 의미, 해당 명령어의 실행 함수와 매핑.<br>SECTION 그룹은 액션 리스트, 서비스 리스트를 구분.<br>OPTION 그룹은 명령어, 프로세스를 실행할 때 실행 조건을 부여.<br>KEYWORD 리스트들은 KEYWORD 매크로를 통해 keyword_info 구조체 배열의 리스트로 변경.  </p>
+<p><em>keyword.h에 정의된 KEYWORD 매크로</em><br>“K_키워드” 심볼로 정의된 열거형 데이터로 변환되어 1부터 차례대로 번호가 부여된다.  </p>
+<h3 id="액션-리스트-및-서비스-리스트의-실행"><a href="#액션-리스트-및-서비스-리스트의-실행" class="headerlink" title="액션 리스트 및 서비스 리스트의 실행"></a>액션 리스트 및 서비스 리스트의 실행</h3><h4 id="액션-리스트-1"><a href="#액션-리스트-1" class="headerlink" title="액션 리스트"></a>액션 리스트</h4><p>액션 리스트 내의 명령어가 실행되는 과정을 먼저 살펴본다.<br>action_remove_queue_head() 함수를 통해서 전역으로 선언된 액션 리스트 헤더를 얻어온다.<br>액션 리스트를 command 구조체로 변환하고, 각 명령어에 매핑된 함수를 가져온다.  </p>
+<figure class="highlight reasonml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><code class="hljs reasonml">void drain<span class="hljs-constructor">_action_queue(<span class="hljs-params">void</span>)</span>  <br>&#123;  <br>    <span class="hljs-keyword">struct</span> listnode *node;  <br>    <span class="hljs-keyword">struct</span> command *cmd;  <br>    <span class="hljs-keyword">struct</span> action *act;  <br>    <span class="hljs-built_in">int</span> ret;  <br><br>    <span class="hljs-keyword">while</span> ((act = action<span class="hljs-constructor">_remove_queue_head()</span>)) &#123; <span class="hljs-comment">// action_queue 연결리스트 헤더를 얻어온다.  </span><br>        <span class="hljs-constructor">INFO(<span class="hljs-string">&quot;processing action %p (%s)\n&quot;</span>, <span class="hljs-params">act</span>, <span class="hljs-params">act</span>-&gt;<span class="hljs-params">name</span>)</span>;  <br>        <span class="hljs-built_in">list</span><span class="hljs-constructor">_for_each(<span class="hljs-params">node</span>, &amp;<span class="hljs-params">act</span>-&gt;<span class="hljs-params">commands</span>)</span> &#123;  <br>            cmd = node<span class="hljs-constructor">_to_item(<span class="hljs-params">node</span>, <span class="hljs-params">struct</span> <span class="hljs-params">command</span>, <span class="hljs-params">clist</span>)</span>; <span class="hljs-comment">// 리스트를 command 구초체로 변환한다.  </span><br>            ret = cmd-&gt;func(cmd-&gt;nargs, cmd-&gt;args); <span class="hljs-comment">// 각 명령어에 매핑된 함수  </span><br>            <span class="hljs-constructor">INFO(<span class="hljs-string">&quot;command &#x27;%s&#x27; r=%d\n&quot;</span>, <span class="hljs-params">cmd</span>-&gt;<span class="hljs-params">args</span>[0], <span class="hljs-params">ret</span>)</span>;  <br>        &#125;  <br>    &#125;  <br>&#125;  <br></code></pre></td></tr></table></figure>
+
+<h4 id="서비스-리스트-1"><a href="#서비스-리스트-1" class="headerlink" title="서비스 리스트"></a>서비스 리스트</h4><p>‘on boot’ 섹선의 마지막 명령어인 class_start 명령어를 통해 service 섹션의 모든 프로세스를 실행하게 된다.</p>
+<figure class="highlight reasonml"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs reasonml">service<span class="hljs-constructor">_for_each_class(<span class="hljs-params">args</span>[1], <span class="hljs-params">service_start_if_not_disabled</span>)</span>;  <br></code></pre></td></tr></table></figure>
+
+                
+              </div>
+            
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+    <div class="post-meta mr-3 d-flex align-items-center">
+      <i class="iconfont icon-category"></i>
+      
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/categories/Android/" class="category-chain-item">Android</a>
+  
+  
+
+      </span>
+    
+  
+</span>
+
+    </div>
+  
+  
+    <div class="post-meta">
+      <i class="iconfont icon-tags"></i>
+      
+        <a href="/tags/Android/" class="print-no-link">#Android</a>
+      
+        <a href="/tags/%EC%9D%B8%EC%82%AC%EC%9D%B4%EB%93%9C-%EC%95%88%EB%93%9C%EB%A1%9C%EC%9D%B4%EB%93%9C/" class="print-no-link">#인사이드 안드로이드</a>
+      
+    </div>
+  
+</div>
+
+
+              
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/chapter3_2/" title="[인사이드 안드로이드] 챕터 3 - init 프로세스(2)">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">[인사이드 안드로이드] 챕터 3 - init 프로세스(2)</span>
+                        <span class="visible-mobile">Previous</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/chapter2/" title="[인사이드 안드로이드] 챕터 2 - 안드로이드 개발 환경 구축">
+                        <span class="hidden-mobile">[인사이드 안드로이드] 챕터 2 - 안드로이드 개발 환경 구축</span>
+                        <span class="visible-mobile">Next</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header">
+    <i class="iconfont icon-list"></i>
+    <span>Table of Contents</span>
+  </p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">검색</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">키워드</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <span>Kxxxgs</span> <i class="iconfont icon-love"></i> 
+    </div>
+  
+  
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.4/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.20.1/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    window.tocbot.init(Object.assign({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      scrollSmooth    : true,
+      includeTitleTags: true,
+      headingsOffset  : -boardTop,
+    }, CONFIG.toc));
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('tocbot' in window) {
+        tocbot.refresh();
+        var toc = jQuery('#toc');
+        if (toc.length === 0 || !tocbot) {
+          return;
+        }
+        if (toc.find('.toc-list-item').length > 0) {
+          toc.css('visibility', 'visible');
+        }
+      }
+    });
+  });
+</script>
+
+
+  <script src=https://lib.baomitu.com/clipboard.js/2.0.11/clipboard.min.js></script>
+
+  <script>Fluid.plugins.codeWidget();</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/4.3.1/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('anchors' in window) {
+        anchors.removeAll();
+        var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+        var res = [];
+        for (var item of el) {
+          res.push('.markdown-body > ' + item.trim());
+        }
+        if (CONFIG.anchorjs.placement === 'left') {
+          anchors.options.class = 'anchorjs-link-left';
+        }
+        anchors.add(res.join(', '));
+      }
+    });
+  });
+</script>
+
+
+  <script  src="/js/local-search.js" ></script>
+
+
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">Blog works best with JavaScript enabled</div>
+  </noscript>
+</body>
+</html>

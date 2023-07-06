@@ -1,0 +1,596 @@
+
+
+<!DOCTYPE html>
+<html lang="ko" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/fluid.png">
+  <link rel="icon" href="/img/fluid.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="kxxxgs">
+  <meta name="keywords" content="">
+  
+    <meta name="description" content="[인사이드 안드로이드]Chapter5 - ZygoteZygote란 무엇인가?Zygote의 사전적 의미는 ‘분할 전의 세포나 수정란’이다. 쉽게 말하면 개체가 생성되기 이전의 불완전한 상태.안드로이드 시스템에서 새로운 애플리케이션을 실행하면 실행에 필요한 요소들을 미리 준비해 둔 Zygote 프로세스와 새로운 애플리케이션이 결합되서 실행된다.   Zygote">
+<meta property="og:type" content="article">
+<meta property="og:title" content="[인사이드 안드로이드] 챕터 5 - Zygote">
+<meta property="og:url" content="http://kxxxgs.github.io/chapter5/index.html">
+<meta property="og:site_name" content="kxxxgs">
+<meta property="og:description" content="[인사이드 안드로이드]Chapter5 - ZygoteZygote란 무엇인가?Zygote의 사전적 의미는 ‘분할 전의 세포나 수정란’이다. 쉽게 말하면 개체가 생성되기 이전의 불완전한 상태.안드로이드 시스템에서 새로운 애플리케이션을 실행하면 실행에 필요한 요소들을 미리 준비해 둔 Zygote 프로세스와 새로운 애플리케이션이 결합되서 실행된다.   Zygote">
+<meta property="og:locale" content="ko_KR">
+<meta property="og:image" content="http://kxxxgs.github.io/images/post/zygote1.png">
+<meta property="og:image" content="http://kxxxgs.github.io/images/post/zygote2.png">
+<meta property="og:image" content="http://kxxxgs.github.io/images/post/zygote3.png">
+<meta property="og:image" content="http://kxxxgs.github.io/images/post/zygote4.png">
+<meta property="og:image" content="http://kxxxgs.github.io/images/post/zygote5.png">
+<meta property="og:image" content="http://kxxxgs.github.io/images/post/zygote6.png">
+<meta property="og:image" content="http://kxxxgs.github.io/images/post/zygote7.png">
+<meta property="article:published_time" content="2019-04-17T15:00:00.000Z">
+<meta property="article:modified_time" content="2023-07-06T15:46:03.790Z">
+<meta property="article:author" content="kxxxgs">
+<meta property="article:tag" content="Android">
+<meta property="article:tag" content="인사이드 안드로이드">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="http://kxxxgs.github.io/images/post/zygote1.png">
+  
+  
+  
+  <title>[인사이드 안드로이드] 챕터 5 - Zygote - kxxxgs</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1749284_hj8rtnfg7um.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_lbnruvf0jn.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"kxxxgs.github.io","root":"/","version":"1.9.5","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":false},"image_zoom":{"enable":false,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":{"measurement_id":null},"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false}},"search_path":"/local-search.xml","include_content_in_search":true};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+  
+
+
+  
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>Kxxxgs</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/">
+                <i class="iconfont icon-home-fill"></i>
+                <span>Home</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/">
+                <i class="iconfont icon-category-fill"></i>
+                <span>Categories</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/">
+                <i class="iconfont icon-user-fill"></i>
+                <span>About</span>
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              <i class="iconfont icon-search"></i>
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">
+              <i class="iconfont icon-dark" id="color-toggle-icon"></i>
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/img/default.png') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="[인사이드 안드로이드] 챕터 5 - Zygote"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2019-04-18 00:00" pubdate>
+          2019년 4월 18일 오전
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          3k words
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          26 mins
+        
+      </span>
+    
+
+    
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <h1 id="seo-header">[인사이드 안드로이드] 챕터 5 - Zygote</h1>
+            
+            
+              <div class="markdown-body">
+                
+                <h1 id="인사이드-안드로이드"><a href="#인사이드-안드로이드" class="headerlink" title="[인사이드 안드로이드]"></a>[인사이드 안드로이드]</h1><h2 id="Chapter5-Zygote"><a href="#Chapter5-Zygote" class="headerlink" title="Chapter5 - Zygote"></a>Chapter5 - Zygote</h2><h3 id="Zygote란-무엇인가"><a href="#Zygote란-무엇인가" class="headerlink" title="Zygote란 무엇인가?"></a>Zygote란 무엇인가?</h3><p>Zygote의 사전적 의미는 ‘분할 전의 세포나 수정란’이다. 쉽게 말하면 개체가 생성되기 이전의 불완전한 상태.<br><strong>안드로이드 시스템에서 새로운 애플리케이션을 실행하면 실행에 필요한 요소들을 미리 준비해 둔 Zygote 프로세스와 새로운 애플리케이션이 결합되서 실행된다.</strong>  </p>
+<p>Zygote 프로세스는 실행되면서 달빅(Dalvik) 가상 머신을 초기화하고 구동시킨다. 안드로이드 애플리케이션은 자바로 작성돼 있어 리눅스 상에서 네이티브 프로세스로 실행될 수 없으며 달빅 가상 머신에서 동작한다. 각 안드로이드 애플리케이션은 독립적인 가상 머신 위에서 동작하는데, 실행될 때 마다 자신이 동작할 가상 머신을 초기화하고 실행하는 과정에는 많은 시간이 소요되며 애플리케이션의 실행을 느리게 하는 요인이 된다. 때문에 안드로이드에서 Zygote 프로세스는 애플리케이션이 실행되기 전에 실행된 가상 머신의 코드 및 메모리 정보를 공유함으로써 <strong>애플리케이션이 실행되는 시간을 단축시킬 수 있다.</strong> 여기에 더해 안드로이드 프레임워크에서 동작하는 <strong>애플리케이션이 사용할 클래스와 자원을 미리 메모리에 로딩해 두고 이러한 자원에 대한 연결 정보를 구성한다.</strong><br>Zygote 프로세스를 사용하는 목적으로는 애플리케이션의 생성 속도를 빠르게 해서 한정된 자원을 효율적으로 사용해 사용 시간을 늘리기 위함이다.  </p>
+<h4 id="Zygote를-통한-프로세스의-생성"><a href="#Zygote를-통한-프로세스의-생성" class="headerlink" title="Zygote를 통한 프로세스의 생성"></a>Zygote를 통한 프로세스의 생성</h4><p><img src="/images/post/zygote1.png" srcset="/img/loading.gif" lazyload alt="zygote1" title="zygote1">  </p>
+<p>Zygote 프로세스는 init 프로세스가 시스템 구동에 필요한 각종 데몬을 실행하고 난 뒤 실행된다. Zygote 프로세스가 실행된 이후에는 안드로이드 서비스 및 애플리케이션은 Zygote 프로세스를 통해 실행된다.  </p>
+<p><img src="/images/post/zygote2.png" srcset="/img/loading.gif" lazyload alt="zygote2" title="zygote2">  </p>
+<p>일반적인 리눅스 시스템에서 새로운 애플리케이션을 실행하는 과정은 위와 같다.<br>부모 프로세스 A는 fork() 시스템 콜을 호출하여 새로운 자식 프로세스 A’를 생성한다. 새로 생성된 프로세스 A’는 부모 프로세스인 프로세스 A의 메모리 구성 정보 및 공유 라이브러리에 대한 링크 정보를 공유한 상태이다. 다음으로 자식 프로세스 A’는 exec(‘B’) 시스템 콜을 호출해 새로운 프로세스 B의 코드를 메모리로 로딩한다. 이때 부모 프로세스 A의 메모리 정보는 지워지고 로딩된 B를 실행하는 데 필요한 메모리를 새롭게 구성한 후 프로세스 B가 사용한 공유 라이브러리에 대한 링크 정보를 새로 구성한다.  </p>
+<p><strong>안드로이드에서</strong>는 COW(Copy On Write)를 통해 기존에 이미 메모리 상에서 동작중인 프로세스의 재사용성을 극대화하고 공유 라이브러리를 통해 메모리 사용량(foot print)을 최소화한다.  </p>
+<blockquote>
+<p>COW(Copy On Write)란 프로세스를 생성할 때 새로 생성된 자식 프로세스는 부모 프로세스와 메모리 공간을 공유하는데, 메모리 복사를 하는 것은 오버헤드가 매우 크기 때문에 생성된 자식 프로세스가 부모의 메모리 공간을 참조만 할 경우에는 이를 복사하지 않고 부모의 메모리 공간을 공유하게 된다. 공유하는 메모리 정보를 자식 프로세스가 수정하는 시점에서 부모 프로세스의 메모리 정보를 자신의 메모리 공간으로 복사하는 것이 바로 COW 기법이다.   </p>
+</blockquote>
+<p><img src="/images/post/zygote3.png" srcset="/img/loading.gif" lazyload alt="zygote3" title="zygote3">  </p>
+<p>Zygote 프로세스는 fork() 시스템 콜을 호출해 자식 프로세스인 Zygote’ 프로세스를 생성한다. 생성된 Zygote’ 프로세스는 부모인 Zygote 프로세스의 코드 영역과 링크 정보를 공유한다. 새로운 안드로이드 애플리케이션 A는 fork()를 통해 생성도니 프로세스의 코드 영역을 새롭게 로딩하는 것이 아니라, 복제된 달빅 가상 머신 위에 동적으로 로딩된다. 이후에 zygote’ 프로세스는 애플리케이션 A 클래스의 메서드로 실행 흐름을 넘겨 안드로이드 애플리케이션이 동작하게 된다. <strong>새로 생성된 애플리케이션 A는 기존의 Zygote 프로세스가 구성해 놓은 라이브러리 및 리소스에 대한 링크정보를 그대로 사용하기에 빠르게 실행된다.</strong><br>다음은 Zygote가 실행되고 나서 새로운 안드로이드 애플리케이션 A가 실행되기까지의 과정을 나타낸다.  </p>
+<p><img src="/images/post/zygote4.png" srcset="/img/loading.gif" lazyload alt="zygote4" title="zygote4">  </p>
+<p>Zygote는 달빅 가상 머신을 초기화하고, 필요한 클래스와 자원을 메모리에 로딩한다. fork()를 통해 새로 생성된 Zygote’ 프로세스는 마지막 단계에서 새로 실행되는 안드로이드 애플리케이션 A를 동적으로 로딩하고 실행한다. 실행되는 애플리케이션 A는 Zygote가 미리 초기화하고 실행한 달빅 가상 머신의 코드를 그대로 사용하며, 미리 메모리에 로딩해둔 클래스와 자원을 사용함으로써 빠르게 실행된다.  </p>
+<h4 id="app-process로부터-ZygoteInit-class-실행"><a href="#app-process로부터-ZygoteInit-class-실행" class="headerlink" title="app_process로부터 ZygoteInit class 실행"></a>app_process로부터 ZygoteInit class 실행</h4><p>Zygote는 자바로 작성돼 있으므로 다른 네이티브 서비스나 데몬과 같이 init 프로세스에서 바로 실행할 수 없다. 자바로 작성돼 있는 Zygote 클래스가 동작하려면 달빅 가상 머신이 생성돼야 하고, 생성된 가상 머신 위에서 Zygoteinit 클래스를 로딩하고 실행해야 한다. 이러한 작업을 수행하는 프로세스가 바로 <strong>app_process</strong>다.  </p>
+<p><img src="/images/post/zygote5.png" srcset="/img/loading.gif" lazyload alt="zygote5" title="zygote5">  </p>
+<p>&#x2F;System&#x2F;bin&#x2F;app_process의 소스 코드에 있는 main() 함수에서 AppRuntime 객체를 생성한 후 main() 함수에 전달된 인자 값을 분석해서 AppRuntime 객체에 전달한다. 그러고 나서 달빅 가상 머신을 초기화하고 생성한 다음 마지막으로 ZygoteInit 클래스의 main() 메서드를 호출한다.  </p>
+<h4 id="ZygoteInit-클래스의-기능"><a href="#ZygoteInit-클래스의-기능" class="headerlink" title="ZygoteInit 클래스의 기능"></a>ZygoteInit 클래스의 기능</h4><p><img src="/images/post/zygote6.png" srcset="/img/loading.gif" lazyload alt="zygote6" title="zygote6">  </p>
+<p>그림은 ZygoteInit::main() 메서드의 기능을 요약했다.<br>main() 메서드에서는 새로운 안드로이드 애플리케이션을 실행하기 위한 요청을 수신하는 데 쓸 소켓을 바인딩한다. 안드로이드 애플리케이션 프레임워크에서 사용할 클래스와 리소스를 로딩하고 <strong>SystemServer</strong>를 실행한다. 시스템 서버는 안드로이드 플랫폼에 필요한 주요 네이티브 서비스들을 실행하게 된다. 이후에 등록된 UDS를 모니터링하고 있다가 새로운 안드로이드 애플리케이션의 생성 요청을 받으면 이를 처리하는 루프로 진입한다.  </p>
+<p>ZygoteInit 클래스는 &#x2F;dev&#x2F;socket&#x2F;zygote에 생성된 유닉스 도메인 소켓을 사용해서 ActivityManager로부터 전달되는 새 안드로이드 애플리케이션의 생성 요청 메시지를 수신한다. 이 소켓은 init 부팅 과정에서 프로세스에 의해 생성되며, init.rc에 기술돼 있다.<br>또한 ZygoteInit 클래스는 preloadClasses()와 preloadResources() 메서드를 호출한다. 각 메서드는 안드로이드 애플리케이션 프레임워크에 포함되는 클래스와 아이콘, 이미지, 문자열 등의 자원을 미리 메모리에 로딩하고 로딩한 클래스와 자원에 대한 연결 정보를 생성한다. 이후 새로 생성되는 안드로이드 애플리케이션에서는 미리 로딩한 클래스나 자원을 이용할 때 새로 연결정보를 생성하지 않고 그대로 이용한다.  </p>
+<p>그렇다면 사용할 클래스를 메모리에 미리 로딩하는 것이 얼마만큼의 효과가 있을까? logcat 명령어를 통해 확인하면 1942개의 클래스를 로딩하는 데 18202ms가 걸렸다. 만약 미리 로딩하는 과정이 없을 경우, 18202ms의 추가시간이 걸리게 된다.  </p>
+<p>Zygote에서 달빅 가상 머신을 구동한 이후, 시스템 서버(SystemServer)라는 자바 서비스를 실행하기 위해 새로운 달빅 가상 머신 인스턴스를 생성한다. 시스템 서버는 필요한 네이티브 서비스를 실행하고, 안드로이드 프레임워크의 서비스들을 시작한다. 이때 시작되는 서비스로는 안드로이드 애플리케이션의 액티비티를 관리하는 액티비티 매니저(ActivityManager), 애플리케이션을 설치, 관리하는 패키지 매니저(PackageManager)등이 있다.  </p>
+<p>다음 그림은 ZygoteInit 클래스가 새로운 프로세스를 생성하는 과정을 나타낸다.  </p>
+<p><img src="/images/post/zygote7.png" srcset="/img/loading.gif" lazyload alt="zygote7" title="zygote7">  </p>
+
+                
+              </div>
+            
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+    <div class="post-meta mr-3 d-flex align-items-center">
+      <i class="iconfont icon-category"></i>
+      
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/categories/Android/" class="category-chain-item">Android</a>
+  
+  
+
+      </span>
+    
+  
+</span>
+
+    </div>
+  
+  
+    <div class="post-meta">
+      <i class="iconfont icon-tags"></i>
+      
+        <a href="/tags/Android/" class="print-no-link">#Android</a>
+      
+        <a href="/tags/%EC%9D%B8%EC%82%AC%EC%9D%B4%EB%93%9C-%EC%95%88%EB%93%9C%EB%A1%9C%EC%9D%B4%EB%93%9C/" class="print-no-link">#인사이드 안드로이드</a>
+      
+    </div>
+  
+</div>
+
+
+              
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/chapter6/" title="[인사이드 안드로이드] 챕터 6 - 안드로이드 서비스 개요">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">[인사이드 안드로이드] 챕터 6 - 안드로이드 서비스 개요</span>
+                        <span class="visible-mobile">Previous</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/chapter4_3/" title="[인사이드 안드로이드] 챕터 4 - JNI와 NDK(3)">
+                        <span class="hidden-mobile">[인사이드 안드로이드] 챕터 4 - JNI와 NDK(3)</span>
+                        <span class="visible-mobile">Next</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header">
+    <i class="iconfont icon-list"></i>
+    <span>Table of Contents</span>
+  </p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">검색</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">키워드</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <span>Kxxxgs</span> <i class="iconfont icon-love"></i> 
+    </div>
+  
+  
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.4/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.20.1/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    window.tocbot.init(Object.assign({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      scrollSmooth    : true,
+      includeTitleTags: true,
+      headingsOffset  : -boardTop,
+    }, CONFIG.toc));
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('tocbot' in window) {
+        tocbot.refresh();
+        var toc = jQuery('#toc');
+        if (toc.length === 0 || !tocbot) {
+          return;
+        }
+        if (toc.find('.toc-list-item').length > 0) {
+          toc.css('visibility', 'visible');
+        }
+      }
+    });
+  });
+</script>
+
+
+  <script src=https://lib.baomitu.com/clipboard.js/2.0.11/clipboard.min.js></script>
+
+  <script>Fluid.plugins.codeWidget();</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/4.3.1/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('anchors' in window) {
+        anchors.removeAll();
+        var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+        var res = [];
+        for (var item of el) {
+          res.push('.markdown-body > ' + item.trim());
+        }
+        if (CONFIG.anchorjs.placement === 'left') {
+          anchors.options.class = 'anchorjs-link-left';
+        }
+        anchors.add(res.join(', '));
+      }
+    });
+  });
+</script>
+
+
+  <script  src="/js/local-search.js" ></script>
+
+
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">Blog works best with JavaScript enabled</div>
+  </noscript>
+</body>
+</html>

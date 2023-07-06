@@ -1,0 +1,580 @@
+
+
+<!DOCTYPE html>
+<html lang="ko" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/fluid.png">
+  <link rel="icon" href="/img/fluid.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="kxxxgs">
+  <meta name="keywords" content="">
+  
+    <meta name="description" content="[안드로이드 프레임워크 개선]PackageManager6scanPackageDirtyLIVersion : android-6.0.1_r77PackageManagerService.javaLine : 6482 ~ 7545   소스 코드 : https:&#x2F;&#x2F;android.googlesource.com&#x2F;platform&#x2F;frameworks&#x2F;base&#x2F;+&#x2F;refs&#x2F;tags">
+<meta property="og:type" content="article">
+<meta property="og:title" content="[안드로이드 프레임워크 개선] - PackageManager6">
+<meta property="og:url" content="http://kxxxgs.github.io/PackageManager6/index.html">
+<meta property="og:site_name" content="kxxxgs">
+<meta property="og:description" content="[안드로이드 프레임워크 개선]PackageManager6scanPackageDirtyLIVersion : android-6.0.1_r77PackageManagerService.javaLine : 6482 ~ 7545   소스 코드 : https:&#x2F;&#x2F;android.googlesource.com&#x2F;platform&#x2F;frameworks&#x2F;base&#x2F;+&#x2F;refs&#x2F;tags">
+<meta property="og:locale" content="ko_KR">
+<meta property="og:image" content="http://kxxxgs.github.io/images/post/PM6_1.png">
+<meta property="article:published_time" content="2019-08-06T15:00:00.000Z">
+<meta property="article:modified_time" content="2023-07-06T15:47:43.196Z">
+<meta property="article:author" content="kxxxgs">
+<meta property="article:tag" content="Android">
+<meta property="article:tag" content="안드로이드 프레임워크 개선">
+<meta property="article:tag" content="PackageManager">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="http://kxxxgs.github.io/images/post/PM6_1.png">
+  
+  
+  
+  <title>[안드로이드 프레임워크 개선] - PackageManager6 - kxxxgs</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1749284_hj8rtnfg7um.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_lbnruvf0jn.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"kxxxgs.github.io","root":"/","version":"1.9.5","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":false},"image_zoom":{"enable":false,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":{"measurement_id":null},"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false}},"search_path":"/local-search.xml","include_content_in_search":true};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+  
+
+
+  
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>Kxxxgs</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/">
+                <i class="iconfont icon-home-fill"></i>
+                <span>Home</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/">
+                <i class="iconfont icon-category-fill"></i>
+                <span>Categories</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/">
+                <i class="iconfont icon-user-fill"></i>
+                <span>About</span>
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              <i class="iconfont icon-search"></i>
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">
+              <i class="iconfont icon-dark" id="color-toggle-icon"></i>
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/img/default.png') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="[안드로이드 프레임워크 개선] - PackageManager6"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2019-08-07 00:00" pubdate>
+          2019년 8월 7일 오전
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          875 words
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          8 mins
+        
+      </span>
+    
+
+    
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <h1 id="seo-header">[안드로이드 프레임워크 개선] - PackageManager6</h1>
+            
+            
+              <div class="markdown-body">
+                
+                <h1 id="안드로이드-프레임워크-개선"><a href="#안드로이드-프레임워크-개선" class="headerlink" title="[안드로이드 프레임워크 개선]"></a>[안드로이드 프레임워크 개선]</h1><h2 id="PackageManager6"><a href="#PackageManager6" class="headerlink" title="PackageManager6"></a>PackageManager6</h2><h3 id="scanPackageDirtyLI"><a href="#scanPackageDirtyLI" class="headerlink" title="scanPackageDirtyLI"></a>scanPackageDirtyLI</h3><p>Version : android-6.0.1_r77<br>PackageManagerService.java<br>Line : 6482 ~ 7545  </p>
+<p>소스 코드 : <a target="_blank" rel="noopener" href="https://android.googlesource.com/platform/frameworks/base/+/refs/tags/android-6.0.1_r77/services/core/java/com/android/server/pm/PackageManagerService.java">https://android.googlesource.com/platform/frameworks/base/+/refs/tags/android-6.0.1_r77/services/core/java/com/android/server/pm/PackageManagerService.java</a>  </p>
+<p>PackageManagerService.java의 <strong>scanPackageDirtyLI</strong> 메소드 중 오래걸리는 파트를 확인하기 위해 다음과 같은 방법을 통해 로그를 찍었다.  </p>
+<figure class="highlight reasonml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><code class="hljs reasonml">long scanStart = <span class="hljs-module-access"><span class="hljs-module"><span class="hljs-identifier">SystemClock</span>.</span></span>uptime<span class="hljs-constructor">Millis()</span>;<br><br>:<br>:<br><br><span class="hljs-module-access"><span class="hljs-module"><span class="hljs-identifier">Slog</span>.</span></span>i(TAG, <span class="hljs-string">&quot;Time to scan part 1: &quot;</span><br>                  + ((<span class="hljs-module-access"><span class="hljs-module"><span class="hljs-identifier">SystemClock</span>.</span></span>uptime<span class="hljs-constructor">Millis()</span>-scanStart)/<span class="hljs-number">1000</span>f)<br>                  + <span class="hljs-string">&quot; seconds&quot;</span>);<br></code></pre></td></tr></table></figure>
+
+
+<p>로그는 다음과 같이 출력되었으며 그 아래와 같이 평균을 내었다.  </p>
+<p><img src="/images/post/PM6_1.png" srcset="/img/loading.gif" lazyload alt="PM6_1" title="PM6_1">  </p>
+<h5 id="파트1-6482-6555-평균-0-0004초"><a href="#파트1-6482-6555-평균-0-0004초" class="headerlink" title="파트1 - 6482 ~ 6555 : 평균 0.0004초"></a>파트1 - 6482 ~ 6555 : 평균 0.0004초</h5><h5 id="파트2-6565-6666-평균-0-0000714초"><a href="#파트2-6565-6666-평균-0-0000714초" class="headerlink" title="파트2 - 6565 ~ 6666 : 평균 0.0000714초"></a>파트2 - 6565 ~ 6666 : 평균 0.0000714초</h5><h5 id="파트3-6668-6822-평균-0-0000371초"><a href="#파트3-6668-6822-평균-0-0000371초" class="headerlink" title="파트3 - 6668 ~ 6822 : 평균 0.0000371초"></a>파트3 - 6668 ~ 6822 : 평균 0.0000371초</h5><h5 id="파트4-6824-6961-평균-0-0000928초"><a href="#파트4-6824-6961-평균-0-0000928초" class="headerlink" title="파트4 - 6824 ~ 6961 : 평균 0.0000928초"></a>파트4 - 6824 ~ 6961 : 평균 0.0000928초</h5><h5 id="파트5-6963-7148-평균-0-0315초"><a href="#파트5-6963-7148-평균-0-0315초" class="headerlink" title="파트5 - 6963 ~ 7148 : 평균 0.0315초"></a>파트5 - 6963 ~ 7148 : 평균 0.0315초</h5><h5 id="파트6-7153-7545-평균-0-0000714초"><a href="#파트6-7153-7545-평균-0-0000714초" class="headerlink" title="파트6 - 7153 ~ 7545 : 평균 0.0000714초"></a>파트6 - 7153 ~ 7545 : 평균 0.0000714초</h5><p>라는 결과를 얻었다. 로그를 통해서 파트5부분이 가장 오래걸리며, 해결이 시급한 부분으로 보인다.  </p>
+<h3 id="6963-7148"><a href="#6963-7148" class="headerlink" title="6963 ~ 7148"></a>6963 ~ 7148</h3><p>가장 시간이 오래걸렸던 파트부분을 다시 세 부분으로 나누어서 시간을 측정했다.  </p>
+<h5 id="파트1-6963-7023-평균-0-0161초"><a href="#파트1-6963-7023-평균-0-0161초" class="headerlink" title="파트1 - 6963 ~ 7023 : 평균 0.0161초"></a>파트1 - 6963 ~ 7023 : 평균 0.0161초</h5><h5 id="파트2-7029-7091-평균-0-0141초"><a href="#파트2-7029-7091-평균-0-0141초" class="headerlink" title="파트2 - 7029 ~ 7091 : 평균 0.0141초"></a>파트2 - 7029 ~ 7091 : 평균 0.0141초</h5><h5 id="파트3-7093-7148-평균-0초"><a href="#파트3-7093-7148-평균-0초" class="headerlink" title="파트3 - 7093 ~ 7148 : 평균 0초"></a>파트3 - 7093 ~ 7148 : 평균 0초</h5><p>라는 결과를 얻었다. 해당 시간값을 통해서 부팅속도 개선을 위한 영역을 좁힐 수 있었다.  </p>
+
+                
+              </div>
+            
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+    <div class="post-meta mr-3 d-flex align-items-center">
+      <i class="iconfont icon-category"></i>
+      
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/categories/Android/" class="category-chain-item">Android</a>
+  
+  
+
+      </span>
+    
+  
+</span>
+
+    </div>
+  
+  
+    <div class="post-meta">
+      <i class="iconfont icon-tags"></i>
+      
+        <a href="/tags/Android/" class="print-no-link">#Android</a>
+      
+        <a href="/tags/%EC%95%88%EB%93%9C%EB%A1%9C%EC%9D%B4%EB%93%9C-%ED%94%84%EB%A0%88%EC%9E%84%EC%9B%8C%ED%81%AC-%EA%B0%9C%EC%84%A0/" class="print-no-link">#안드로이드 프레임워크 개선</a>
+      
+        <a href="/tags/PackageManager/" class="print-no-link">#PackageManager</a>
+      
+    </div>
+  
+</div>
+
+
+              
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/PackageManager7/" title="[안드로이드 프레임워크 개선] - PackageManager7">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">[안드로이드 프레임워크 개선] - PackageManager7</span>
+                        <span class="visible-mobile">Previous</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/PackageManager5/" title="[안드로이드 프레임워크 개선] - PackageManager5">
+                        <span class="hidden-mobile">[안드로이드 프레임워크 개선] - PackageManager5</span>
+                        <span class="visible-mobile">Next</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header">
+    <i class="iconfont icon-list"></i>
+    <span>Table of Contents</span>
+  </p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">검색</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">키워드</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <span>Kxxxgs</span> <i class="iconfont icon-love"></i> 
+    </div>
+  
+  
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.4/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.20.1/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    window.tocbot.init(Object.assign({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      scrollSmooth    : true,
+      includeTitleTags: true,
+      headingsOffset  : -boardTop,
+    }, CONFIG.toc));
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('tocbot' in window) {
+        tocbot.refresh();
+        var toc = jQuery('#toc');
+        if (toc.length === 0 || !tocbot) {
+          return;
+        }
+        if (toc.find('.toc-list-item').length > 0) {
+          toc.css('visibility', 'visible');
+        }
+      }
+    });
+  });
+</script>
+
+
+  <script src=https://lib.baomitu.com/clipboard.js/2.0.11/clipboard.min.js></script>
+
+  <script>Fluid.plugins.codeWidget();</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/4.3.1/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('anchors' in window) {
+        anchors.removeAll();
+        var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+        var res = [];
+        for (var item of el) {
+          res.push('.markdown-body > ' + item.trim());
+        }
+        if (CONFIG.anchorjs.placement === 'left') {
+          anchors.options.class = 'anchorjs-link-left';
+        }
+        anchors.add(res.join(', '));
+      }
+    });
+  });
+</script>
+
+
+  <script  src="/js/local-search.js" ></script>
+
+
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">Blog works best with JavaScript enabled</div>
+  </noscript>
+</body>
+</html>

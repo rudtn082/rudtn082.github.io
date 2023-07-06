@@ -1,0 +1,629 @@
+
+
+<!DOCTYPE html>
+<html lang="ko" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/fluid.png">
+  <link rel="icon" href="/img/fluid.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="kxxxgs">
+  <meta name="keywords" content="">
+  
+    <meta name="description" content="[인사이드 안드로이드]Chapter3 - init 프로세스(2)디바이스 노드 파일 생성안드로이드에서 애플리케이션이 하드웨어에 접근할 때 디바이스 드라이버를 통해서 접근한다.애플리케이션은 디바이스 드라이버에 접근하기 위해 디바이스 노드를 사용한다.리눅스에서는 ‘mknod’유틸리티를 지원하지만 안드로이드에서는 보안문제로 제공하지 않는다.   정적 디바이스 노드">
+<meta property="og:type" content="article">
+<meta property="og:title" content="[인사이드 안드로이드] 챕터 3 - init 프로세스(2)">
+<meta property="og:url" content="http://kxxxgs.github.io/chapter3_2/index.html">
+<meta property="og:site_name" content="kxxxgs">
+<meta property="og:description" content="[인사이드 안드로이드]Chapter3 - init 프로세스(2)디바이스 노드 파일 생성안드로이드에서 애플리케이션이 하드웨어에 접근할 때 디바이스 드라이버를 통해서 접근한다.애플리케이션은 디바이스 드라이버에 접근하기 위해 디바이스 노드를 사용한다.리눅스에서는 ‘mknod’유틸리티를 지원하지만 안드로이드에서는 보안문제로 제공하지 않는다.   정적 디바이스 노드">
+<meta property="og:locale" content="ko_KR">
+<meta property="article:published_time" content="2019-03-27T15:00:00.000Z">
+<meta property="article:modified_time" content="2023-07-06T15:45:54.614Z">
+<meta property="article:author" content="kxxxgs">
+<meta property="article:tag" content="Android">
+<meta property="article:tag" content="인사이드 안드로이드">
+<meta name="twitter:card" content="summary_large_image">
+  
+  
+  
+  <title>[인사이드 안드로이드] 챕터 3 - init 프로세스(2) - kxxxgs</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1749284_hj8rtnfg7um.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_lbnruvf0jn.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"kxxxgs.github.io","root":"/","version":"1.9.5","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":false},"image_zoom":{"enable":false,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":{"measurement_id":null},"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false}},"search_path":"/local-search.xml","include_content_in_search":true};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+  
+
+
+  
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>Kxxxgs</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/">
+                <i class="iconfont icon-home-fill"></i>
+                <span>Home</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/">
+                <i class="iconfont icon-category-fill"></i>
+                <span>Categories</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/">
+                <i class="iconfont icon-user-fill"></i>
+                <span>About</span>
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              <i class="iconfont icon-search"></i>
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">
+              <i class="iconfont icon-dark" id="color-toggle-icon"></i>
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/img/default.png') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="[인사이드 안드로이드] 챕터 3 - init 프로세스(2)"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2019-03-28 00:00" pubdate>
+          2019년 3월 28일 오전
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          8.2k words
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          68 mins
+        
+      </span>
+    
+
+    
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <h1 id="seo-header">[인사이드 안드로이드] 챕터 3 - init 프로세스(2)</h1>
+            
+            
+              <div class="markdown-body">
+                
+                <h1 id="인사이드-안드로이드"><a href="#인사이드-안드로이드" class="headerlink" title="[인사이드 안드로이드]"></a>[인사이드 안드로이드]</h1><h2 id="Chapter3-init-프로세스-2"><a href="#Chapter3-init-프로세스-2" class="headerlink" title="Chapter3 - init 프로세스(2)"></a>Chapter3 - init 프로세스(2)</h2><h3 id="디바이스-노드-파일-생성"><a href="#디바이스-노드-파일-생성" class="headerlink" title="디바이스 노드 파일 생성"></a>디바이스 노드 파일 생성</h3><p>안드로이드에서 애플리케이션이 하드웨어에 접근할 때 <strong>디바이스 드라이버</strong>를 통해서 접근한다.<br>애플리케이션은 디바이스 드라이버에 접근하기 위해 <strong>디바이스 노드</strong>를 사용한다.<br>리눅스에서는 ‘mknod’유틸리티를 지원하지만 <strong>안드로이드에서는 보안문제로 제공하지 않는다.</strong>  </p>
+<h4 id="정적-디바이스-노드-생성"><a href="#정적-디바이스-노드-생성" class="headerlink" title="정적 디바이스 노드 생성"></a>정적 디바이스 노드 생성</h4><p>리눅스에서는 디바이스 노드파일을 “&#x2F;dev” 디렉터리에 정의하고, 이 노드파일을 통해 디바이스 드라이버에 접근한다.<br>하지만 안드로이드의 루트 파일 시스템은 “&#x2F;dev” 디렉터리가 존재하지 않고, <strong>init 프로세스가 두 가지 방법으로 디바이스 노드 파일을 생성</strong>한다.</p>
+<p>① 미리 정의된 디바이스 정보를 바탕으로 init 프로세스가 실행될 때 일괄적으로 디바이스 노드 파일 생성 - <strong>콜드 플러그(Cold Plug)</strong><br>② 시스템 동작 중 USB와 같은 장치가 삽입될 때 이벤트 처리로 디바이스 노드 파일을 동적으로 생성 - <strong>핫 플러그(Hot Plug)</strong>  </p>
+<h5 id="콜드-플러그-방식"><a href="#콜드-플러그-방식" class="headerlink" title="콜드 플러그 방식"></a>콜드 플러그 방식</h5><p>콜드 플러그는 이미 삽입된 장치에 대한 처리를 담당하는 메커니즘.<br>리눅스에서는 부팅 후에 udev 데몬이 실행되면서 “&#x2F;sys” 디렉터리에서 미리 등록된 디바이스 정보를 읽고, 디바이드에 대해 uevent를 발생시켜 디바이스 노드 파일을 생성하는 방식이다.<br><em>udev &#x3D; “&#x2F;dev” 디렉터리에 자동으로 디바이스 노드 파일을 생성하는 역할</em><br><em>uevent &#x3D; 커널에서 사용자 공간의 프로세스로 메시지를 전달하기 위한 신호 체계</em>  </p>
+<p>이를 안드로이드에서는 udev 데몬의 역할을 <strong>init 프로세스가 수행</strong>한다.  </p>
+<p>책에서는 콜드 플러그 방식으로 디바이스 노드를 생성하는 예로 7장의 ‘안드로이드 바인더 IPC’를 통해 설명한다.<br>먼저 바인더 드라이버는 가상의 장치이며 프로세스간의 RPC(Remote Procedure Call)를 제공하는 데 쓰인다.<br>바인더를 이용하려는 응용프로그램은 “&#x2F;dev&#x2F;binder”라는 디바이스 노드를 사용해서 바인더 디바이스에 접근해야 한다.  </p>
+<p><strong>커널 부팅 시</strong><br>커널 부팅 시 바인더 드라이버는 misc_register() 함수를 통해서 디바이스 노드 파일을 생성하는 데 필요한 정보를 “&#x2F;sys” 파일 시스템에 저장한다.<br>이제 init 프로세스를 통해 디바이스 노드 파일을 생성해야 하는데, <strong>아직 커널 부팅 단계이므로 uevent를 발생시킬 수 없다.</strong>  </p>
+<p><strong>커널 부팅 완료</strong><br>init 프로세스가 실행되면 위의 바인더 드라이버처럼 디바이스 노드 파일을 생성하지 못한 드라이버에 대해 콜드플러그 처리를 한다.<br>콜드 플러그 처리될 드라이버들은 아래처럼 <strong>devices.c 파일에 미리 정의</strong>되어있다.  </p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><code class="hljs cpp"><span class="hljs-type">static</span> <span class="hljs-keyword">struct</span> <span class="hljs-title class_">perms_</span> devperms[] = &#123;  <br>    &#123; <span class="hljs-string">&quot;/dev/null&quot;</span>,          <span class="hljs-number">0666</span>,   AID_ROOT,       AID_ROOT,       <span class="hljs-number">0</span> &#125;,  <br>    &#123; <span class="hljs-string">&quot;/dev/zero&quot;</span>,          <span class="hljs-number">0666</span>,   AID_ROOT,       AID_ROOT,       <span class="hljs-number">0</span> &#125;,  <br>    &#123; <span class="hljs-string">&quot;/dev/full&quot;</span>,          <span class="hljs-number">0666</span>,   AID_ROOT,       AID_ROOT,       <span class="hljs-number">0</span> &#125;,  <br>    &#123; <span class="hljs-string">&quot;/dev/ptmx&quot;</span>,          <span class="hljs-number">0666</span>,   AID_ROOT,       AID_ROOT,       <span class="hljs-number">0</span> &#125;,  <br>    &#123; <span class="hljs-string">&quot;/dev/tty&quot;</span>,           <span class="hljs-number">0666</span>,   AID_ROOT,       AID_ROOT,       <span class="hljs-number">0</span> &#125;,  <br>    &#123; <span class="hljs-string">&quot;/dev/random&quot;</span>,        <span class="hljs-number">0666</span>,   AID_ROOT,       AID_ROOT,       <span class="hljs-number">0</span> &#125;,  <br>    &#123; <span class="hljs-string">&quot;/dev/urandom&quot;</span>,       <span class="hljs-number">0666</span>,   AID_ROOT,       AID_ROOT,       <span class="hljs-number">0</span> &#125;,  <br>    &#123; <span class="hljs-string">&quot;/dev/ashmem&quot;</span>,        <span class="hljs-number">0666</span>,   AID_ROOT,       AID_ROOT,       <span class="hljs-number">0</span> &#125;,  <br>    &#123; <span class="hljs-string">&quot;/dev/binder&quot;</span>,        <span class="hljs-number">0666</span>,   AID_ROOT,       AID_ROOT,       <span class="hljs-number">0</span> &#125;,  <br>    :  <br>    :  <br></code></pre></td></tr></table></figure>
+
+<p>devperms 구조체를 참고하여 <strong>“&#x2F;dev” 디렉터리에 디바이스 노드 파일들을 생성</strong>한다.<br>구조체는 파일 이름, 접근권한, 사용자 ID, 그룹 ID를 나타낸다.  </p>
+<p><strong>콜드 플러그 처리 절차</strong><br>device_init() 함수는 uevent를 수신하기 위한 소켓을 생성하고, coldboot()를 통해 내부적으로 do_coldboot() 함수를 호출하여 “&#x2F;sys” 디렉터리에 등록된 드라이버에 대해 콜드플러그 처리를 한다.  </p>
+<figure class="highlight reasonml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><code class="hljs reasonml"><span class="hljs-built_in">int</span> device<span class="hljs-constructor">_init(<span class="hljs-params">void</span>)</span>  <br>&#123;  <br>    fd = <span class="hljs-keyword">open</span><span class="hljs-constructor">_uevent_socket()</span>; <span class="hljs-comment">// 소켓 생성  </span><br>    t0 = get<span class="hljs-constructor">_usecs()</span>; <span class="hljs-comment">// 시간측정  </span><br>    coldboot(fd, <span class="hljs-string">&quot;/sys/class&quot;</span>);  <br>    coldboot(fd, <span class="hljs-string">&quot;/sys/block&quot;</span>);  <br>    coldboot(fd, <span class="hljs-string">&quot;/sys/devices&quot;</span>);  <br>    t1 = get<span class="hljs-constructor">_usecs()</span>; <span class="hljs-comment">// 시간측정  </span><br>    log<span class="hljs-constructor">_event_print(<span class="hljs-string">&quot;coldboot %ld uS\n&quot;</span>, ((<span class="hljs-params">long</span>)</span> (t1 - t0))); <span class="hljs-comment">// 시간 로그 출력  </span><br>&#125;  <br></code></pre></td></tr></table></figure>
+
+<p>do_coldboot() 함수에서는 디렉터리 경로를 받아 해당 경로를 이용해 저장된 uevent 파일을 찾은 후, add메시지를 써넣어 uevent를 발생시킨다.<br><em>파일에 add를 넣는다고 uevent가 바로 발생되는가??</em>  </p>
+<figure class="highlight reasonml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><code class="hljs reasonml">static void <span class="hljs-keyword">do</span><span class="hljs-constructor">_coldboot(<span class="hljs-params">int</span> <span class="hljs-params">event_fd</span>, DIR <span class="hljs-operator">*</span><span class="hljs-params">d</span>)</span>  <br>&#123;  <br>    fd = openat(dfd, <span class="hljs-string">&quot;uevent&quot;</span>, O_WRONLY); <span class="hljs-comment">// uevent 파일을 찾아서  </span><br>    <span class="hljs-keyword">if</span>(fd &gt;= <span class="hljs-number">0</span>) &#123;  <br>        write(fd, <span class="hljs-string">&quot;add\n&quot;</span>, <span class="hljs-number">4</span>); <span class="hljs-comment">// &quot;add&quot; 메시지 추가로 uevent 발생  </span><br>        close(fd);  <br>        handle<span class="hljs-constructor">_device_fd(<span class="hljs-params">event_fd</span>)</span>; <span class="hljs-comment">// uevent 수신하여 처리  </span><br>    &#125;  <br>&#125;  <br></code></pre></td></tr></table></figure>
+
+<p>그리고 handle_device_fd() 함수에서 uevent를 수신하여 메시지를 수신해서 uevent구조체에 할당한다.<br>uevent 구조체를 완성하면 handle_device_event() 함수를 호출하여 실제 노드 파일을 생성한다.<br><strong>&#x2F;dev 디렉터리 아래에 하위 디렉터리를 생성</strong>한다.  </p>
+<figure class="highlight csharp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><code class="hljs csharp"><span class="hljs-function"><span class="hljs-keyword">static</span> <span class="hljs-keyword">void</span> <span class="hljs-title">handle_device_event</span>(<span class="hljs-params"><span class="hljs-keyword">struct</span> uevent *uevent</span>) <span class="hljs-comment">// uevent 구조체를 받아서  </span></span><br>&#123;  <br>  <span class="hljs-keyword">if</span>(!strncmp(uevent-&gt;subsystem, <span class="hljs-string">&quot;block&quot;</span>, <span class="hljs-number">5</span>)) &#123;  <br>          block = <span class="hljs-number">1</span>;  <br>          <span class="hljs-keyword">base</span> = <span class="hljs-string">&quot;/dev/block/&quot;</span>;  <br>          mkdir(<span class="hljs-keyword">base</span>, <span class="hljs-number">0755</span>); <span class="hljs-comment">// 하위 디렉터리를 생성.  </span><br>      &#125;  <br>&#125;  <br></code></pre></td></tr></table></figure>
+
+<p>하위 디렉터리를 모두 생성하면 <strong>make_device() 함수를 통해 디바이스 노드 파일을 생성</strong>한다.  </p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs cpp"><span class="hljs-function"><span class="hljs-type">static</span> <span class="hljs-type">void</span> <span class="hljs-title">make_device</span><span class="hljs-params">(<span class="hljs-type">const</span> <span class="hljs-type">char</span> *path, <span class="hljs-type">int</span> block, <span class="hljs-type">int</span> major, <span class="hljs-type">int</span> minor)</span>  </span><br><span class="hljs-function"></span>&#123;  <br>    <span class="hljs-type">mode_t</span> mode;  <br>    <span class="hljs-type">dev_t</span> dev;  <br>    <span class="hljs-built_in">mknod</span>(path, mode, dev); <span class="hljs-comment">// 디바이스 노드 파일 생성  </span><br>    <span class="hljs-built_in">chown</span>(path, uid, <span class="hljs-number">-1</span>);  <br>&#125;  <br></code></pre></td></tr></table></figure>
+
+
+<h4 id="동적-디바이스-감지"><a href="#동적-디바이스-감지" class="headerlink" title="동적 디바이스 감지"></a>동적 디바이스 감지</h4><p>init 프로세스는 시스템 동작 중 추가되는 장치의 디바이스 노드 파일 생성을 위해 핫플러그 처리를 지원한다.  </p>
+<h5 id="핫-플러그-방식"><a href="#핫-플러그-방식" class="headerlink" title="핫 플러그 방식"></a>핫 플러그 방식</h5><p>다음과 같이 init 프로세스의 이벤트 처리 루프에서 처리된다.  </p>
+<figure class="highlight reasonml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><code class="hljs reasonml"><span class="hljs-built_in">int</span> main(<span class="hljs-built_in">int</span> argc, <span class="hljs-built_in">char</span> **argv)  <br>&#123;  <br>  <span class="hljs-keyword">for</span>(;;) &#123;  <br>        nr = poll(ufds, fd_count, timeout); <span class="hljs-comment">// poll 함수를 통해서 uevent를 감지  </span><br>        :  <br>        :  <br>        <span class="hljs-keyword">if</span> (ufds<span class="hljs-literal">[<span class="hljs-number">0</span>]</span>.revents<span class="hljs-operator"> == </span>POLLIN)  <br>            handle<span class="hljs-constructor">_device_fd(<span class="hljs-params">device_fd</span>)</span>; <span class="hljs-comment">// 콜드 플러그와 같이 handle_device_fd() 함수를 호출  </span><br>  &#125;  <br>&#125;  <br></code></pre></td></tr></table></figure>
+
+
+
+<h3 id="프로세스-종료와-재시작"><a href="#프로세스-종료와-재시작" class="headerlink" title="프로세스 종료와 재시작"></a>프로세스 종료와 재시작</h3><p>다양한 프로세스들이 init 프로세스에 의해 실행되고, 종료되면 시스템 동작에 영향을 미치는 것들이 존재한다.<br>따라서 init 프로세스가 실행하는 프로세스는 일부를 제외하고 <strong>대부분은 재시작된다.</strong><br>프로세스 옵션에 <strong>onshot이 정의돼 있다면 재시작하지 않는다.</strong>  </p>
+<h4 id="프로세스-재시작-코드-분석"><a href="#프로세스-재시작-코드-분석" class="headerlink" title="프로세스 재시작 코드 분석"></a>프로세스 재시작 코드 분석</h4><p>자식 프로세스가 종료되면 다음과 같이 SIGCHLD 시그널에 대한 핸들러를 수행한다.  </p>
+<figure class="highlight scss"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs scss">static void <span class="hljs-built_in">sigchld_handler</span>(int s) <span class="hljs-comment">// SIGCHLD 시그널 번호를 받는다.  </span><br>&#123;  <br>    <span class="hljs-built_in">write</span>(signal_fd, &amp;s, <span class="hljs-number">1</span>); <span class="hljs-comment">// 소켓 디스크립터에 기록한다.  </span><br>&#125;  <br></code></pre></td></tr></table></figure>
+
+<p>signal_fd는 이전에 소켓쌍으로 생성됐기 떄문에 수신측 소켓 디스크립터인 <strong>signal_recv_fd</strong>로 시그널 번호를 전송한다.<br>시그널 번호를 받은 signal_recv_fd는 main에서 이미 POLL로 등록돼 있기 때문에 <strong>wait_for_one_process() 함수를 실행</strong>하게 된다.<br><em>poll()함수는 이벤트 처리 루프에서 이벤트를 감시했었음.</em>  </p>
+<figure class="highlight csharp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><code class="hljs csharp"><span class="hljs-function"><span class="hljs-built_in">int</span> <span class="hljs-title">main</span>(<span class="hljs-params"><span class="hljs-built_in">int</span> argc, <span class="hljs-built_in">char</span> **argv</span>)</span>  <br>&#123;  <br>  <span class="hljs-keyword">for</span>(;;) &#123;  <br>    nr = poll(ufds, fd_count, timeout); <span class="hljs-comment">// poll() 함수는 이벤트를 감시하다가 빠져나옴.  </span><br>    <span class="hljs-keyword">if</span> (nr &lt;= <span class="hljs-number">0</span>)  <br>        <span class="hljs-keyword">continue</span>;  <br><br>    <span class="hljs-keyword">if</span> (ufds[<span class="hljs-number">2</span>].revents == POLLIN) &#123;  <br>        <span class="hljs-comment">/* we got a SIGCHLD - reap and restart as needed */</span>  <br>        read(signal_recv_fd, tmp, <span class="hljs-keyword">sizeof</span>(tmp));  <br>        <span class="hljs-keyword">while</span> (!wait_for_one_process(<span class="hljs-number">0</span>)); <span class="hljs-comment">// wait_for_one_process() 함수를 수행.  </span><br>        <span class="hljs-keyword">continue</span>;  <br>    &#125;  <br>  &#125;  <br>&#125;  <br></code></pre></td></tr></table></figure>
+
+<p>다음은 <strong>wait_for_one_process() 함수</strong>를 보여준다.  </p>
+<figure class="highlight xl"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br></pre></td><td class="code"><pre><code class="hljs xl">static int wait_for_one_process(int <span class="hljs-keyword">block</span>)  <br>&#123;  <br>    :  <br>    :  <br>    <span class="hljs-keyword">while</span> ( (pid = waitpid(-<span class="hljs-number">1</span>, &amp;status, <span class="hljs-keyword">block</span> ? <span class="hljs-number">0</span> : WNOHANG)) == -<span class="hljs-number">1</span> &amp;&amp; errno == EINTR ); <span class="hljs-comment">// 프로세스가 종료되면 할당된 자원을 회수.  </span><br><br>    svc = service_find_by_pid(pid); <span class="hljs-comment">// 종료된 프로세스에 해당하는 서비스 항목을 가져옴.  </span><br><br>    <span class="hljs-function"><span class="hljs-title">if</span> (!(svc-&gt;</span>flags &amp; SVC_ONESHOT)) &#123; <span class="hljs-comment">// 가져온 서비스 항목의 옵션에 SVC_ONESHOT이 설정 되어있는지 체크.  </span><br>        kill(-pid, SIGKILL); <span class="hljs-comment">// SVC_ONESHOT이 설정 되어있으면 종료  </span><br>        NOTICE(<span class="hljs-string">&quot;process &#x27;%s&#x27; killing any children in process group\n&quot;</span>, <span class="hljs-function"><span class="hljs-title">svc</span>-&gt;</span><span class="hljs-keyword">name</span>);  <br>    &#125;  <br><br>    <span class="hljs-comment">/* remove any sockets we may have created */</span>  <br>    <span class="hljs-function"><span class="hljs-title">for</span> (si = svc-&gt;</span><span class="hljs-function"><span class="hljs-title">sockets</span>; si; si = si-&gt;</span>next) &#123; <span class="hljs-comment">// 프로세스가 가진 소켓 디스크립터를 모두 삭제.  </span><br>        char tmp[<span class="hljs-number">128</span>];  <br>        <span class="hljs-function"><span class="hljs-title">snprintf</span>(tmp, sizeof(tmp), ANDROID_SOCKET_DIR&quot;/%s&quot;, si-&gt;</span><span class="hljs-keyword">name</span>);  <br>        unlink(tmp);  <br>    &#125;  <br><br>    <span class="hljs-function"><span class="hljs-title">svc</span>-&gt;</span>pid = <span class="hljs-number">0</span>;  <br>    <span class="hljs-function"><span class="hljs-title">svc</span>-&gt;</span>flags &amp;= (~SVC_RUNNING); <span class="hljs-comment">// 프로세스가 구동중임을 나타내는 pid 값, SVC_RUNNING을 제거.  </span><br><br>        <span class="hljs-comment">/* oneshot processes go into the disabled state on exit */</span>  <br>    <span class="hljs-function"><span class="hljs-title">if</span> (svc-&gt;</span>flags &amp; SVC_ONESHOT) &#123; <span class="hljs-comment">// SVC_ONESHOT 옵션이 설정된 프로세스의 플래그를  </span><br>        <span class="hljs-function"><span class="hljs-title">svc</span>-&gt;</span>flags |= SVC_DISABLED; <span class="hljs-comment">// disabled 설정하고  </span><br>    &#125;  <br><br>        <span class="hljs-comment">/* disabled processes do not get restarted automatically */</span>  <br>    <span class="hljs-function"><span class="hljs-title">if</span> (svc-&gt;</span>flags &amp; SVC_DISABLED) &#123; <span class="hljs-comment">// disabled 설정된 프로세스는  </span><br>        <span class="hljs-function"><span class="hljs-title">notify_service_state</span>(svc-&gt;</span><span class="hljs-keyword">name</span>, <span class="hljs-string">&quot;stopped&quot;</span>);  <br>        return <span class="hljs-number">0</span>; <span class="hljs-comment">// 함수를 빠져나가서 재시작되지 않는다.  </span><br>    &#125;  <br><br>    <span class="hljs-comment">/* Execute all onrestart commands for this service. */</span>  <br>    <span class="hljs-function"><span class="hljs-title">list_for_each</span>(node, &amp;svc-&gt;</span>onrestart.commands) &#123; <span class="hljs-comment">// 재시작할 프로세스가 onrestart 옵션을 가지는지 체크.  </span><br>        cmd = node_to_item(node, struct command, clist);  <br>        <span class="hljs-function"><span class="hljs-title">cmd</span>-&gt;</span><span class="hljs-function"><span class="hljs-title">func</span>(cmd-&gt;</span><span class="hljs-function"><span class="hljs-title">nargs</span>, cmd-&gt;</span>args);  <br>    &#125;  <br><br>    <span class="hljs-function"><span class="hljs-title">svc</span>-&gt;</span>flags |= SVC_RESTARTING; <span class="hljs-comment">// 프로세스의 플래그에 SVC_RESTARTING를 추가한다.  </span><br>&#125;  <br></code></pre></td></tr></table></figure>
+
+<p>wait_for_one_process() 함수의 실행이 완료되면 <strong>restart_processes() 함수를 실행</strong>한다.  </p>
+<figure class="highlight csharp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs csharp"><span class="hljs-function"><span class="hljs-keyword">static</span> <span class="hljs-keyword">void</span> <span class="hljs-title">restart_processes</span>()</span>  <br>&#123;  <br>    process_needs_restart = <span class="hljs-number">0</span>;  <br>    service_for_each_flags(SVC_RESTARTING, restart_service_if_needed); <span class="hljs-comment">// SVC_RESTARTING 플래그를 가진 프로세스를 실행한다.  </span><br>&#125;  <br></code></pre></td></tr></table></figure>
+
+<p>따라서 자식프로세스가 종료되어 SIGCHLD 시그널을 발생시키더라도 이 함수를 통해 재시작하게 된다.  </p>
+<h3 id="프로퍼티-서비스"><a href="#프로퍼티-서비스" class="headerlink" title="프로퍼티 서비스"></a>프로퍼티 서비스</h3><p>init 프로세스의 이벤트 처리 루프에서는 프로퍼티의 변경 요청 이벤트도 있다.  </p>
+<ul>
+<li>프로퍼티는 안드로이드 시스템이 동작하는 데 필요한 <strong>각종 설정 값을 동작 중인 모든 프로세스에서 공유하기 위해 프로퍼티라는 저장 공간을 사용</strong>한다.  </li>
+<li>프로퍼티는 키(key)와 값(value)로 구성되며, ‘키 &#x3D; 값’ 형태로 사용된다.  </li>
+<li>안드로이드에서는 이 값을 변경할 때는 권한을 확인하는 과정이 있다.  </li>
+<li>모든 동작중인 프로세스는 프로퍼티의 값을 조회할 수 있다.  </li>
+<li>프로퍼티 값을 <strong>변경하는 것은 init 프로세스만이 가능</strong>, 다른 프로세스는 변경 요청.  </li>
+<li>프로퍼티의 값이 변경되면 init.rc에 정의된 특정 조건을 만족하는 경우 조건에 해당하는 동작 실행, **이를 트리거(trigger)**라 한다.</li>
+</ul>
+<h4 id="프로퍼티-초기화"><a href="#프로퍼티-초기화" class="headerlink" title="프로퍼티 초기화"></a>프로퍼티 초기화</h4><p>init 프로세스의 main() 함수 초기에 <strong>property_init() 함수</strong>를 통해서 프로퍼티 영역을 초기화한다.<br>property_init() 함수는 프로퍼티의 값을 저장하기 위한 공유 메모리를 생성하는데, 이를 위해 ashmem(Android Shared Memory)을 사용한다.<br><em>프로퍼티 값을 저장하거나 조회할때는 get(), set() 함수를 이용한다.</em>  </p>
+<figure class="highlight scss"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs scss">void <span class="hljs-built_in">property_init</span>(void)  <br>&#123;  <br>    <span class="hljs-built_in">init_property_area</span>(); <span class="hljs-comment">// 공유 메모리 영역 구성.  </span><br>    <span class="hljs-built_in">load_properties_from_file</span>(PROP_PATH_RAMDISK_DEFAULT); <span class="hljs-comment">// 파일로 부터 초기값을 읽어 프로퍼티 값을 설정.  </span><br>&#125;  <br></code></pre></td></tr></table></figure>
+
+<p>init 프로세스는 start_property_service() 함수를 호출하여 프로퍼티 서비스를 시작한다.  </p>
+<figure class="highlight ini"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs ini"><span class="hljs-attr">property_set_fd</span> = start_property_service()<span class="hljs-comment">; // 프로퍼티 서비스 시작.  </span><br></code></pre></td></tr></table></figure>
+
+<figure class="highlight reasonml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><code class="hljs reasonml"><span class="hljs-built_in">int</span> start<span class="hljs-constructor">_property_service(<span class="hljs-params">void</span>)</span>  <br>&#123;  <br>    <span class="hljs-built_in">int</span> fd;  <br>    load<span class="hljs-constructor">_properties_from_file(PROP_PATH_SYSTEM_BUILD)</span>; <span class="hljs-comment">// 프로퍼티의 기본값을 읽어 프로퍼티 값을 설정.  </span><br>    load<span class="hljs-constructor">_properties_from_file(PROP_PATH_SYSTEM_DEFAULT)</span>;  <br>    load<span class="hljs-constructor">_properties_from_file(PROP_PATH_LOCAL_OVERRIDE)</span>;  <br><br>    <span class="hljs-comment">/* Read persistent properties after all default values have been loaded. */</span>  <br>    load<span class="hljs-constructor">_persistent_properties()</span>; <span class="hljs-comment">// /data/property 디렉터리에 저장돼 있는 프로퍼티 값을 읽는다. (동작 중에 다른 프로세스에 의해 생성된 프로퍼티 값이나 변경된 값들)  </span><br>    fd = create<span class="hljs-constructor">_socket(PROP_SERVICE_NAME, SOCK_STREAM, 0666, 0, 0)</span>; <span class="hljs-comment">// property_service라는 이름의 도메인 소켓 생성.  </span><br>&#125;  <br></code></pre></td></tr></table></figure>
+
+<h4 id="프로퍼티-변경-요청-처리"><a href="#프로퍼티-변경-요청-처리" class="headerlink" title="프로퍼티 변경 요청 처리"></a>프로퍼티 변경 요청 처리</h4><p>앞에서 생성한 소켓으로 프로퍼티 값의 변경 요청 메시지가 수신되면 <strong>handle_property_set_fd() 함수가 호출</strong>된다.  </p>
+<figure class="highlight reasonml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><code class="hljs reasonml">void handle<span class="hljs-constructor">_property_set_fd(<span class="hljs-params">int</span> <span class="hljs-params">fd</span>)</span>  <br>&#123;  <br>    <span class="hljs-comment">/* Check socket options here */</span>  <br>    <span class="hljs-keyword">if</span> (getsockopt(s, SOL_SOCKET, SO_PEERCRED, &amp;cr, &amp;cr_size) &lt; <span class="hljs-number">0</span>) &#123; <span class="hljs-comment">// 소켓으로 부터 값을 얻어온다.  </span><br>        close(s);  <br>        <span class="hljs-constructor">ERROR(<span class="hljs-string">&quot;Unable to recieve socket options\n&quot;</span>)</span>;  <br>        return;  <br>    &#125;  <br>    :  <br>    :  <br>    switch(msg.cmd) &#123;  <br>    case PROP_MSG_SETPROP:  <br>        <span class="hljs-keyword">if</span>(memcmp(msg.name,<span class="hljs-string">&quot;ctl.&quot;</span>,<span class="hljs-number">4</span>)<span class="hljs-operator"> == </span><span class="hljs-number">0</span>) &#123; <span class="hljs-comment">// &quot;ctl&quot;은 시스템 프로퍼티 값을 변경하는 것이 아니라, 프로세스의 시작, 종료를 요청하는 메시지.  </span><br>            <span class="hljs-keyword">if</span> (check<span class="hljs-constructor">_control_perms(<span class="hljs-params">msg</span>.<span class="hljs-params">value</span>, <span class="hljs-params">cr</span>.<span class="hljs-params">uid</span>, <span class="hljs-params">cr</span>.<span class="hljs-params">gid</span>)</span>) &#123; <span class="hljs-comment">// check_control_perms() 함수를 이용하여 접근 권한 검사. (system server, root, 해당 프로세스만 종료하거나 시작할 수 있음)  </span><br>                handle<span class="hljs-constructor">_control_message((<span class="hljs-params">char</span><span class="hljs-operator">*</span>)</span> msg.name + <span class="hljs-number">4</span>, (<span class="hljs-built_in">char</span>*) msg.value);  <br>            &#125; <span class="hljs-keyword">else</span> &#123;  <br>                <span class="hljs-constructor">ERROR(<span class="hljs-string">&quot;sys_prop: Unable to %s service ctl [%s] uid: %d pid:%d\n&quot;</span>, <span class="hljs-params">msg</span>.<span class="hljs-params">name</span> + 4, <span class="hljs-params">msg</span>.<span class="hljs-params">value</span>, <span class="hljs-params">cr</span>.<span class="hljs-params">uid</span>, <span class="hljs-params">cr</span>.<span class="hljs-params">pid</span>)</span>;  <br>            &#125;  <br>        &#125; <span class="hljs-keyword">else</span> &#123; <span class="hljs-comment">// 시스템의 프로퍼티를 변경하는 데 사용.  </span><br>            <span class="hljs-keyword">if</span> (check<span class="hljs-constructor">_perms(<span class="hljs-params">msg</span>.<span class="hljs-params">name</span>, <span class="hljs-params">cr</span>.<span class="hljs-params">uid</span>, <span class="hljs-params">cr</span>.<span class="hljs-params">gid</span>)</span>) &#123; <span class="hljs-comment">// 접근 권한은 check_perms() 함수를 호출하여 검사한다.  </span><br>                property<span class="hljs-constructor">_set((<span class="hljs-params">char</span><span class="hljs-operator">*</span>)</span> msg.name, (<span class="hljs-built_in">char</span>*) msg.value); <span class="hljs-comment">// 프로퍼티 값을 변경한다.  </span><br>            &#125;  <br>        &#125;  <br>    &#125;  <br>&#125;  <br></code></pre></td></tr></table></figure>
+
+<p>프로퍼티 값을 변경하고, 문제가 없다면 <strong>property_changed() 함수가 호출</strong>된다.  </p>
+
+                
+              </div>
+            
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+    <div class="post-meta mr-3 d-flex align-items-center">
+      <i class="iconfont icon-category"></i>
+      
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/categories/Android/" class="category-chain-item">Android</a>
+  
+  
+
+      </span>
+    
+  
+</span>
+
+    </div>
+  
+  
+    <div class="post-meta">
+      <i class="iconfont icon-tags"></i>
+      
+        <a href="/tags/Android/" class="print-no-link">#Android</a>
+      
+        <a href="/tags/%EC%9D%B8%EC%82%AC%EC%9D%B4%EB%93%9C-%EC%95%88%EB%93%9C%EB%A1%9C%EC%9D%B4%EB%93%9C/" class="print-no-link">#인사이드 안드로이드</a>
+      
+    </div>
+  
+</div>
+
+
+              
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/chapter4/" title="[인사이드 안드로이드] 챕터 4 - JNI와 NDK(1)">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">[인사이드 안드로이드] 챕터 4 - JNI와 NDK(1)</span>
+                        <span class="visible-mobile">Previous</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/chapter3/" title="[인사이드 안드로이드] 챕터 3 - init 프로세스(1)">
+                        <span class="hidden-mobile">[인사이드 안드로이드] 챕터 3 - init 프로세스(1)</span>
+                        <span class="visible-mobile">Next</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header">
+    <i class="iconfont icon-list"></i>
+    <span>Table of Contents</span>
+  </p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">검색</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">키워드</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <span>Kxxxgs</span> <i class="iconfont icon-love"></i> 
+    </div>
+  
+  
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.4/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.20.1/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    window.tocbot.init(Object.assign({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      scrollSmooth    : true,
+      includeTitleTags: true,
+      headingsOffset  : -boardTop,
+    }, CONFIG.toc));
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('tocbot' in window) {
+        tocbot.refresh();
+        var toc = jQuery('#toc');
+        if (toc.length === 0 || !tocbot) {
+          return;
+        }
+        if (toc.find('.toc-list-item').length > 0) {
+          toc.css('visibility', 'visible');
+        }
+      }
+    });
+  });
+</script>
+
+
+  <script src=https://lib.baomitu.com/clipboard.js/2.0.11/clipboard.min.js></script>
+
+  <script>Fluid.plugins.codeWidget();</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/4.3.1/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('anchors' in window) {
+        anchors.removeAll();
+        var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+        var res = [];
+        for (var item of el) {
+          res.push('.markdown-body > ' + item.trim());
+        }
+        if (CONFIG.anchorjs.placement === 'left') {
+          anchors.options.class = 'anchorjs-link-left';
+        }
+        anchors.add(res.join(', '));
+      }
+    });
+  });
+</script>
+
+
+  <script  src="/js/local-search.js" ></script>
+
+
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">Blog works best with JavaScript enabled</div>
+  </noscript>
+</body>
+</html>

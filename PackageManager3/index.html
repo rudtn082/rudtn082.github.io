@@ -1,0 +1,596 @@
+
+
+<!DOCTYPE html>
+<html lang="ko" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/fluid.png">
+  <link rel="icon" href="/img/fluid.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="kxxxgs">
+  <meta name="keywords" content="">
+  
+    <meta name="description" content="[안드로이드 프레임워크 개선]PackageManager3역할 분담우리는 지난주에 이어 빌드한 내용을 넥서스 5 디바이스에 플래싱 하기로 하였다.우여곡절 끝에 플래싱 한 디바이스는 벽돌이 되어서, 일단 역할 분담을 하고 프로젝트를 계속 진행하기로 하였다.    넥서스 5 플래싱 진행.   PackageManagerService.java의 생성자 파트 코드 리">
+<meta property="og:type" content="article">
+<meta property="og:title" content="[안드로이드 프레임워크 개선] - PackageManager3">
+<meta property="og:url" content="http://kxxxgs.github.io/PackageManager3/index.html">
+<meta property="og:site_name" content="kxxxgs">
+<meta property="og:description" content="[안드로이드 프레임워크 개선]PackageManager3역할 분담우리는 지난주에 이어 빌드한 내용을 넥서스 5 디바이스에 플래싱 하기로 하였다.우여곡절 끝에 플래싱 한 디바이스는 벽돌이 되어서, 일단 역할 분담을 하고 프로젝트를 계속 진행하기로 하였다.    넥서스 5 플래싱 진행.   PackageManagerService.java의 생성자 파트 코드 리">
+<meta property="og:locale" content="ko_KR">
+<meta property="og:image" content="http://kxxxgs.github.io/images/post/PM3_1.png">
+<meta property="article:published_time" content="2019-07-10T15:00:00.000Z">
+<meta property="article:modified_time" content="2023-07-06T15:47:48.866Z">
+<meta property="article:author" content="kxxxgs">
+<meta property="article:tag" content="Android">
+<meta property="article:tag" content="안드로이드 프레임워크 개선">
+<meta property="article:tag" content="PackageManager">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="http://kxxxgs.github.io/images/post/PM3_1.png">
+  
+  
+  
+  <title>[안드로이드 프레임워크 개선] - PackageManager3 - kxxxgs</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1749284_hj8rtnfg7um.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_lbnruvf0jn.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"kxxxgs.github.io","root":"/","version":"1.9.5","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":false},"image_zoom":{"enable":false,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":{"measurement_id":null},"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false}},"search_path":"/local-search.xml","include_content_in_search":true};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+  
+
+
+  
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>Kxxxgs</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/">
+                <i class="iconfont icon-home-fill"></i>
+                <span>Home</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/">
+                <i class="iconfont icon-category-fill"></i>
+                <span>Categories</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/">
+                <i class="iconfont icon-user-fill"></i>
+                <span>About</span>
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              <i class="iconfont icon-search"></i>
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">
+              <i class="iconfont icon-dark" id="color-toggle-icon"></i>
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/img/default.png') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="[안드로이드 프레임워크 개선] - PackageManager3"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2019-07-11 00:00" pubdate>
+          2019년 7월 11일 오전
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          7.8k words
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          66 mins
+        
+      </span>
+    
+
+    
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <h1 id="seo-header">[안드로이드 프레임워크 개선] - PackageManager3</h1>
+            
+            
+              <div class="markdown-body">
+                
+                <h1 id="안드로이드-프레임워크-개선"><a href="#안드로이드-프레임워크-개선" class="headerlink" title="[안드로이드 프레임워크 개선]"></a>[안드로이드 프레임워크 개선]</h1><h2 id="PackageManager3"><a href="#PackageManager3" class="headerlink" title="PackageManager3"></a>PackageManager3</h2><h3 id="역할-분담"><a href="#역할-분담" class="headerlink" title="역할 분담"></a>역할 분담</h3><p>우리는 지난주에 이어 빌드한 내용을 넥서스 5 디바이스에 플래싱 하기로 하였다.<br>우여곡절 끝에 플래싱 한 디바이스는 벽돌이 되어서, 일단 역할 분담을 하고 프로젝트를 계속 진행하기로 하였다.  </p>
+<ol>
+<li>넥서스 5 플래싱 진행.  </li>
+<li>PackageManagerService.java의 생성자 파트 코드 리뷰.  </li>
+<li>‘DEBUG_PACKAGE_SCANNING’ 플래그가 포함된 파트 리뷰.</li>
+</ol>
+<p>이 중에서 나는 3번 ‘DEBUG_PACKAGE_SCANNING’ 플래그가 포함된 파트 리뷰를 맡았다.  </p>
+<h3 id="코드-분석"><a href="#코드-분석" class="headerlink" title="코드 분석"></a>코드 분석</h3><p>Version : android-6.0.1_r77<br>PackageManagerService.java  </p>
+<p>소스 코드 : <a target="_blank" rel="noopener" href="https://android.googlesource.com/platform/frameworks/base/+/refs/tags/android-6.0.1_r77/services/core/java/com/android/server/pm/PackageManagerService.java">https://android.googlesource.com/platform/frameworks/base/+/refs/tags/android-6.0.1_r77/services/core/java/com/android/server/pm/PackageManagerService.java</a>  </p>
+<p>DEBUG_PACKAGE_SCANNING 플래그는 2개의 메소드안에서 다루어지고 있다.  </p>
+<h4 id="1-scanDirLI-메소드"><a href="#1-scanDirLI-메소드" class="headerlink" title="1. scanDirLI 메소드"></a>1. scanDirLI 메소드</h4><p>Line : 5625 ~ 5662   </p>
+<p><strong>scanDirLI</strong>는 <strong>PackageManagerService</strong>에서 패키지들을 synchronized 할 때 사용된다.  </p>
+<p>해당 메소드는 directory 내의 package를 확인한 후 package별로 <strong>scanPackageLI</strong>를 수행하며, 인스톨에 실패한 invalid package를 삭제한다.  </p>
+<p>DEBUG_PACKAGE_SCANNING 플래그가 true일 경우에는 스캐닝 중인 app의 directory, scanFlags, parseFlags를 로그로 출력한다.  </p>
+<figure class="highlight gradle"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></td><td class="code"><pre><code class="hljs gradle"><span class="hljs-keyword">private</span> <span class="hljs-keyword">void</span> scanDirLI(<span class="hljs-keyword">File</span> dir, <span class="hljs-keyword">int</span> parseFlags, <span class="hljs-keyword">int</span> scanFlags, <span class="hljs-keyword">long</span> currentTime) &#123;<br>    <span class="hljs-keyword">final</span> <span class="hljs-keyword">File</span>[] files = dir.listFiles();<br>    <span class="hljs-keyword">if</span> (ArrayUtils.isEmpty(files)) &#123;<br>        Log.d(TAG, <span class="hljs-string">&quot;No files in app dir &quot;</span> + dir);<br>        <span class="hljs-keyword">return</span>;<br>    &#125;<br>     <span class="hljs-comment">//  Scanning 로그 출력  //</span><br>    <span class="hljs-keyword">if</span> (DEBUG_PACKAGE_SCANNING) &#123;<br>        Log.d(TAG, <span class="hljs-string">&quot;Scanning app dir &quot;</span> + dir + <span class="hljs-string">&quot; scanFlags=&quot;</span> + scanFlags<br>                + <span class="hljs-string">&quot; flags=0x&quot;</span> + Integer.toHexString(parseFlags));<br>    &#125;<br>    <span class="hljs-keyword">for</span> (<span class="hljs-keyword">File</span> <span class="hljs-keyword">file</span> : files) &#123;<br>        <span class="hljs-keyword">final</span> <span class="hljs-keyword">boolean</span> isPackage = (isApkFile(<span class="hljs-keyword">file</span>) || <span class="hljs-keyword">file</span>.isDirectory())<br>                &amp;&amp; !PackageInstallerService.isStageName(<span class="hljs-keyword">file</span>.getName());<br>        <span class="hljs-keyword">if</span> (!isPackage) &#123;<br>            <span class="hljs-comment">// Ignore entries which are not packages</span><br>            <span class="hljs-keyword">continue</span>;<br>        &#125;<br>        <span class="hljs-keyword">try</span> &#123;<br>            scanPackageLI(<span class="hljs-keyword">file</span>, parseFlags | PackageParser.PARSE_MUST_BE_APK,<br>                    scanFlags, currentTime, <span class="hljs-keyword">null</span>);<br>        &#125; <span class="hljs-keyword">catch</span> (PackageManagerException e) &#123;<br>            Slog.w(TAG, <span class="hljs-string">&quot;Failed to parse &quot;</span> + <span class="hljs-keyword">file</span> + <span class="hljs-string">&quot;: &quot;</span> + e.getMessage());<br>            <span class="hljs-comment">// Delete invalid userdata apps</span><br>            <span class="hljs-keyword">if</span> ((parseFlags &amp; PackageParser.PARSE_IS_SYSTEM) == <span class="hljs-number">0</span> &amp;&amp;<br>                    e.error == PackageManager.INSTALL_FAILED_INVALID_APK) &#123;<br>                logCriticalInfo(Log.WARN, <span class="hljs-string">&quot;Deleting invalid package at &quot;</span> + <span class="hljs-keyword">file</span>);<br>                <span class="hljs-keyword">if</span> (<span class="hljs-keyword">file</span>.isDirectory()) &#123;<br>                    mInstaller.rmPackageDir(<span class="hljs-keyword">file</span>.getAbsolutePath());<br>                &#125; <span class="hljs-keyword">else</span> &#123;<br>                    <span class="hljs-keyword">file</span>.<span class="hljs-keyword">delete</span>();<br>                &#125;<br>            &#125;<br>        &#125;<br>    &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<h4 id="2-scanPackageDirtyLI-메소드"><a href="#2-scanPackageDirtyLI-메소드" class="headerlink" title="2. scanPackageDirtyLI 메소드"></a>2. scanPackageDirtyLI 메소드</h4><p>Line : 6482 ~ 7545  </p>
+<p><strong>scanPackageDirtyLI</strong>는 <strong>scanPackageLI</strong>에서 부르며, <strong>scanPackageLI</strong>는 <strong>scanDirLI</strong>에서 부른다.  </p>
+<p>해당 메소드는 인자로 받은 package를 분석하여 다시 return한다.<br>(분석 내용은 패키지 업데이트 여부, codePath, partition(system partition or data partition), certificate, 버전 체크 등등)  </p>
+<p>DEBUG_PACKAGE_SCANNING 플래그가 true일 경우에는 다음을 로그로 출력한다.<br><em>line 6545 - 스캐닝 중인 app의 name</em><br><em>line 6572 - PackageSetting 값이 있을 때, Package의 codePath, 세팅값의 codePathString, resourcePathString</em><br><em>line 6611 - Package의 mSharedUserId가 null이 아닌 경우, Package의 mSharedUserId, 세팅값의 userId, packages</em><br><em>line 6939 - normal package이며 해당 directory가 존재하지 않을 경우</em><br><em>line 7259 - Package의 Provider가 존재할때? provider 이름, info name, Syncable한지</em><br><em>line 7285 - Providers의 info.name</em><br><em>line 7305 - Services의 info.name</em><br><em>line 7325 - receivers의 info.name</em><br><em>line 7345 - activities의 info.name</em><br><em>line 7379 - permissionGroups의 info.name</em><br><em>line 7480 - Permissions의 info.name</em><br><em>line 7508 - Instrumentation의 info.name</em>   </p>
+<p>아래 코드는 내용이 많기 때문에, DEBUG_PACKAGE_SCANNING 플래그가 포함된 부분만 발췌  </p>
+<figure class="highlight gradle"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br><span class="line">152</span><br><span class="line">153</span><br><span class="line">154</span><br><span class="line">155</span><br><span class="line">156</span><br><span class="line">157</span><br><span class="line">158</span><br><span class="line">159</span><br><span class="line">160</span><br><span class="line">161</span><br><span class="line">162</span><br><span class="line">163</span><br><span class="line">164</span><br><span class="line">165</span><br><span class="line">166</span><br><span class="line">167</span><br><span class="line">168</span><br><span class="line">169</span><br><span class="line">170</span><br><span class="line">171</span><br><span class="line">172</span><br><span class="line">173</span><br><span class="line">174</span><br><span class="line">175</span><br><span class="line">176</span><br><span class="line">177</span><br><span class="line">178</span><br></pre></td><td class="code"><pre><code class="hljs gradle"><span class="hljs-keyword">private</span> PackageParser.<span class="hljs-keyword">Package</span> scanPackageDirtyLI(PackageParser.<span class="hljs-keyword">Package</span> pkg, <span class="hljs-keyword">int</span> parseFlags,<br>        <span class="hljs-keyword">int</span> scanFlags, <span class="hljs-keyword">long</span> currentTime, UserHandle user) <span class="hljs-keyword">throws</span> PackageManagerException &#123;<br>    <span class="hljs-comment">//  Scanning 로그 출력  //</span><br>    <span class="hljs-keyword">if</span> (DEBUG_PACKAGE_SCANNING) &#123;<br>      <span class="hljs-keyword">if</span> ((parseFlags &amp; PackageParser.PARSE_CHATTY) != <span class="hljs-number">0</span>) <span class="hljs-comment">// PackageParser</span><br>          Log.d(TAG, <span class="hljs-string">&quot;Scanning package &quot;</span> + pkg.packageName);<br>    &#125;<br><br>    :<br>    :<br><br>    <span class="hljs-keyword">if</span> ((scanFlags &amp; SCAN_REQUIRE_KNOWN) != <span class="hljs-number">0</span>) &#123;<br>        <span class="hljs-keyword">if</span> (mExpectingBetter.containsKey(pkg.packageName)) &#123;<br>            logCriticalInfo(Log.WARN,<br>                    <span class="hljs-string">&quot;Relax SCAN_REQUIRE_KNOWN requirement for package &quot;</span> + pkg.packageName);<br>        &#125; <span class="hljs-keyword">else</span> &#123;<br>            PackageSetting known = mSettings.peekPackageLPr(pkg.packageName);<br>            <span class="hljs-keyword">if</span> (known != <span class="hljs-keyword">null</span>) &#123;<br>                <span class="hljs-comment">//  Scanning 로그 출력  //</span><br>                <span class="hljs-keyword">if</span> (DEBUG_PACKAGE_SCANNING) &#123;<br>                    Log.d(TAG, <span class="hljs-string">&quot;Examining &quot;</span> + pkg.codePath<br>                            + <span class="hljs-string">&quot; and requiring known paths &quot;</span> + known.codePathString<br>                            + <span class="hljs-string">&quot; &amp; &quot;</span> + known.resourcePathString);<br>                &#125;<br>                <span class="hljs-keyword">if</span> (!pkg.applicationInfo.getCodePath().equals(known.codePathString)<br>                        || !pkg.applicationInfo.getResourcePath().equals(known.resourcePathString)) &#123;<br>                    <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> PackageManagerException(INSTALL_FAILED_PACKAGE_CHANGED,<br>                            <span class="hljs-string">&quot;Application package &quot;</span> + pkg.packageName<br>                            + <span class="hljs-string">&quot; found at &quot;</span> + pkg.applicationInfo.getCodePath()<br>                            + <span class="hljs-string">&quot; but expected at &quot;</span> + known.codePathString + <span class="hljs-string">&quot;; ignoring.&quot;</span>);<br>                &#125;<br>            &#125;<br>        &#125;<br>    &#125;<br><br>    :<br>    :<br><br>    <span class="hljs-keyword">synchronized</span> (mPackages) &#123;<br>        <span class="hljs-keyword">if</span> (pkg.mSharedUserId != <span class="hljs-keyword">null</span>) &#123;<br>            suid = mSettings.getSharedUserLPw(pkg.mSharedUserId, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>, <span class="hljs-keyword">true</span>);<br>            <span class="hljs-keyword">if</span> (suid == <span class="hljs-keyword">null</span>) &#123;<br>                <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> PackageManagerException(INSTALL_FAILED_INSUFFICIENT_STORAGE,<br>                        <span class="hljs-string">&quot;Creating application package &quot;</span> + pkg.packageName<br>                        + <span class="hljs-string">&quot; for shared user failed&quot;</span>);<br>            &#125;<br>            <span class="hljs-comment">//  Scanning 로그 출력  //</span><br>            <span class="hljs-keyword">if</span> (DEBUG_PACKAGE_SCANNING) &#123;<br>                <span class="hljs-keyword">if</span> ((parseFlags &amp; PackageParser.PARSE_CHATTY) != <span class="hljs-number">0</span>) <span class="hljs-comment">// PackageParser</span><br>                    Log.d(TAG, <span class="hljs-string">&quot;Shared UserID &quot;</span> + pkg.mSharedUserId + <span class="hljs-string">&quot; (uid=&quot;</span> + suid.userId<br>                            + <span class="hljs-string">&quot;): packages=&quot;</span> + suid.packages);<br>            &#125;<br>        &#125;<br><br>        :<br>        :<br>    &#125;<br><br>    :<br>    :<br><br>    <span class="hljs-keyword">if</span> (mPlatformPackage == pkg) &#123;<br>        <span class="hljs-comment">// The system package is special.</span><br>        dataPath = <span class="hljs-keyword">new</span> <span class="hljs-keyword">File</span>(Environment.getDataDirectory(), <span class="hljs-string">&quot;system&quot;</span>);<br>        pkg.applicationInfo.dataDir = dataPath.getPath();<br>    &#125; <span class="hljs-keyword">else</span> &#123;<br>      <span class="hljs-comment">// This is a normal package, need to make its data directory.</span><br>      dataPath = Environment.getDataUserPackageDirectory(pkg.volumeUuid,<br>              UserHandle.USER_OWNER, pkg.packageName);<br>      <span class="hljs-keyword">boolean</span> uidError = <span class="hljs-keyword">false</span>;<br>      <span class="hljs-keyword">if</span> (dataPath.exists()) &#123;<br><br>        :<br>        :<br><br>        &#125; <span class="hljs-keyword">else</span> &#123;<br>            <span class="hljs-comment">//  Scanning 로그 출력  //</span><br>            <span class="hljs-keyword">if</span> (DEBUG_PACKAGE_SCANNING) &#123;<br>                <span class="hljs-keyword">if</span> ((parseFlags &amp; PackageParser.PARSE_CHATTY) != <span class="hljs-number">0</span>) <span class="hljs-comment">// PackageParser</span><br>                    Log.v(TAG, <span class="hljs-string">&quot;Want this data dir: &quot;</span> + dataPath);<br>            &#125;<br>            <span class="hljs-comment">//invoke installer to do the actual installation</span><br>            <span class="hljs-keyword">int</span> ret = createDataDirsLI(pkg.volumeUuid, pkgName, pkg.applicationInfo.uid,<br>                    pkg.applicationInfo.seinfo);<br>            <span class="hljs-keyword">if</span> (ret &lt; <span class="hljs-number">0</span>) &#123;<br>                <span class="hljs-comment">// Error from installer</span><br>                <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> PackageManagerException(INSTALL_FAILED_INSUFFICIENT_STORAGE,<br>                        <span class="hljs-string">&quot;Unable to create data dirs [errorCode=&quot;</span> + ret + <span class="hljs-string">&quot;]&quot;</span>);<br>            &#125;<br>            <span class="hljs-keyword">if</span> (dataPath.exists()) &#123;<br>                pkg.applicationInfo.dataDir = dataPath.getPath();<br>            &#125; <span class="hljs-keyword">else</span> &#123;<br>                Slog.w(TAG, <span class="hljs-string">&quot;Unable to create data directory: &quot;</span> + dataPath);<br>                pkg.applicationInfo.dataDir = <span class="hljs-keyword">null</span>;<br>            &#125;<br>        &#125;<br><br><br>    :<br>    :<br><br>    <span class="hljs-comment">// writer</span><br>    <span class="hljs-keyword">synchronized</span> (mPackages) &#123;<br>        <span class="hljs-comment">// We don&#x27;t expect installation to fail beyond this point</span><br><br>        :<br>        :<br><br>        <span class="hljs-keyword">int</span> N = pkg.providers.<span class="hljs-keyword">size</span>();<br>        StringBuilder r = <span class="hljs-keyword">null</span>;<br>        <span class="hljs-keyword">int</span> i;<br>        <span class="hljs-keyword">for</span> (i=<span class="hljs-number">0</span>; i&lt;N; i++) &#123;<br><br>          :<br>          :<br><br>          String names[] = p.info.authority.split(<span class="hljs-string">&quot;;&quot;</span>);<br>          p.info.authority = <span class="hljs-keyword">null</span>;<br>          <span class="hljs-keyword">for</span> (<span class="hljs-keyword">int</span> j = <span class="hljs-number">0</span>; j &lt; names.length; j++) &#123;<br><br>            :<br>            :<br><br>            <span class="hljs-keyword">if</span> (!mProvidersByAuthority.containsKey(names[j])) &#123;<br>                mProvidersByAuthority.put(names[j], p);<br>                <span class="hljs-keyword">if</span> (p.info.authority == <span class="hljs-keyword">null</span>) &#123;<br>                    p.info.authority = names[j];<br>                &#125; <span class="hljs-keyword">else</span> &#123;<br>                    p.info.authority = p.info.authority + <span class="hljs-string">&quot;;&quot;</span> + names[j];<br>                &#125;<br>                <span class="hljs-comment">//  Scanning 로그 출력  //</span><br>                <span class="hljs-keyword">if</span> (DEBUG_PACKAGE_SCANNING) &#123;<br>                    <span class="hljs-keyword">if</span> ((parseFlags &amp; PackageParser.PARSE_CHATTY) != <span class="hljs-number">0</span>) <span class="hljs-comment">// PackageParser</span><br>                        Log.d(TAG, <span class="hljs-string">&quot;Registered content provider: &quot;</span> + names[j]<br>                                + <span class="hljs-string">&quot;, className = &quot;</span> + p.info.name + <span class="hljs-string">&quot;, isSyncable = &quot;</span><br>                                + p.info.isSyncable);<br>                &#125;<br>            &#125;<br>          &#125;<br>        &#125;<br><br>        <span class="hljs-comment">//  Scanning 로그 출력  //</span><br>        <span class="hljs-keyword">if</span> (r != <span class="hljs-keyword">null</span>) &#123;<br>            <span class="hljs-keyword">if</span> (DEBUG_PACKAGE_SCANNING) Log.d(TAG, <span class="hljs-string">&quot;  Providers: &quot;</span> + r);<br>        &#125;<br><br>        N = pkg.services.<span class="hljs-keyword">size</span>();<br>        r = <span class="hljs-keyword">null</span>;<br>        <span class="hljs-keyword">for</span> (i=<span class="hljs-number">0</span>; i&lt;N; i++) &#123;<br>            PackageParser.Service s = pkg.services.get(i); <span class="hljs-comment">// PackageParser</span><br>            s.info.processName = fixProcessName(pkg.applicationInfo.processName,<br>                    s.info.processName, pkg.applicationInfo.uid);<br>            mServices.addService(s);<br>            <span class="hljs-keyword">if</span> ((parseFlags&amp;PackageParser.PARSE_CHATTY) != <span class="hljs-number">0</span>) &#123;<br>                <span class="hljs-keyword">if</span> (r == <span class="hljs-keyword">null</span>) &#123;<br>                    r = <span class="hljs-keyword">new</span> StringBuilder(<span class="hljs-number">256</span>);<br>                &#125; <span class="hljs-keyword">else</span> &#123;<br>                    r.<span class="hljs-keyword">append</span>(<span class="hljs-string">&#x27; &#x27;</span>);<br>                &#125;<br>                r.<span class="hljs-keyword">append</span>(s.info.name);<br>            &#125;<br>        &#125;<br><br>        <span class="hljs-comment">//  Scanning 로그 출력  //</span><br>        <span class="hljs-keyword">if</span> (r != <span class="hljs-keyword">null</span>) &#123;<br>            <span class="hljs-keyword">if</span> (DEBUG_PACKAGE_SCANNING) Log.d(TAG, <span class="hljs-string">&quot;  Services: &quot;</span> + r);<br>        &#125;<br><br>        :<br>        :<br><br>        <span class="hljs-comment">//  이런식으로 Receivers, Activities, Permission Groups, Permissions, Instrumentation로그 출력   //</span><br><br>        :<br>        :<br>    &#125;<br>  &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>전체적인 흐름을 보았는데, 스캐닝에 관련된 내용 중 개선을 한다면 <strong>scanPackageDirtyLI</strong> 부분을 더 보거나<br>PackageParser의 내용이 많이 나오는데, <strong>PackageParser.java</strong>를 정밀하게 보는 것이 좋을 것 같다.  </p>
+<h3 id="디바이스-플래싱"><a href="#디바이스-플래싱" class="headerlink" title="디바이스 플래싱"></a>디바이스 플래싱</h3><p>보유하고 있는 기기인 넥서스 5에 플래싱 완료하였다.  </p>
+<p><img src="/images/post/PM3_1.png" srcset="/img/loading.gif" lazyload alt="PM3_1" title="PM3_1">  </p>
+<p>다음에는 이전에 사용하려고 했던 갤럭시 A8 (SM-A800S)도 순정 펌웨어를 받아 플래싱 해보려고 한다.  </p>
+
+                
+              </div>
+            
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+    <div class="post-meta mr-3 d-flex align-items-center">
+      <i class="iconfont icon-category"></i>
+      
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/categories/Android/" class="category-chain-item">Android</a>
+  
+  
+
+      </span>
+    
+  
+</span>
+
+    </div>
+  
+  
+    <div class="post-meta">
+      <i class="iconfont icon-tags"></i>
+      
+        <a href="/tags/Android/" class="print-no-link">#Android</a>
+      
+        <a href="/tags/%EC%95%88%EB%93%9C%EB%A1%9C%EC%9D%B4%EB%93%9C-%ED%94%84%EB%A0%88%EC%9E%84%EC%9B%8C%ED%81%AC-%EA%B0%9C%EC%84%A0/" class="print-no-link">#안드로이드 프레임워크 개선</a>
+      
+        <a href="/tags/PackageManager/" class="print-no-link">#PackageManager</a>
+      
+    </div>
+  
+</div>
+
+
+              
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/PackageManager4/" title="[안드로이드 프레임워크 개선] - PackageManager4">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">[안드로이드 프레임워크 개선] - PackageManager4</span>
+                        <span class="visible-mobile">Previous</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/PackageManager2/" title="[안드로이드 프레임워크 개선] - PackageManager2">
+                        <span class="hidden-mobile">[안드로이드 프레임워크 개선] - PackageManager2</span>
+                        <span class="visible-mobile">Next</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header">
+    <i class="iconfont icon-list"></i>
+    <span>Table of Contents</span>
+  </p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">검색</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">키워드</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <span>Kxxxgs</span> <i class="iconfont icon-love"></i> 
+    </div>
+  
+  
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.4/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.20.1/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    window.tocbot.init(Object.assign({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      scrollSmooth    : true,
+      includeTitleTags: true,
+      headingsOffset  : -boardTop,
+    }, CONFIG.toc));
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('tocbot' in window) {
+        tocbot.refresh();
+        var toc = jQuery('#toc');
+        if (toc.length === 0 || !tocbot) {
+          return;
+        }
+        if (toc.find('.toc-list-item').length > 0) {
+          toc.css('visibility', 'visible');
+        }
+      }
+    });
+  });
+</script>
+
+
+  <script src=https://lib.baomitu.com/clipboard.js/2.0.11/clipboard.min.js></script>
+
+  <script>Fluid.plugins.codeWidget();</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/4.3.1/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('anchors' in window) {
+        anchors.removeAll();
+        var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+        var res = [];
+        for (var item of el) {
+          res.push('.markdown-body > ' + item.trim());
+        }
+        if (CONFIG.anchorjs.placement === 'left') {
+          anchors.options.class = 'anchorjs-link-left';
+        }
+        anchors.add(res.join(', '));
+      }
+    });
+  });
+</script>
+
+
+  <script  src="/js/local-search.js" ></script>
+
+
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">Blog works best with JavaScript enabled</div>
+  </noscript>
+</body>
+</html>
