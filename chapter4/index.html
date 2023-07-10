@@ -19,21 +19,21 @@
     <meta name="description" content="[인사이드 안드로이드]Chapter4 - JNI와 NDK(1)안드로이드와 JNI안드로이드 프레임워크는 자바와 C&#x2F;C++ 기반 모듈이 계층별로 구성돼 있다. C&#x2F;C++ 레이어와 자바 레이어가 서로 상호 작용하면서 동작하고 있다.이처럼 프레임워크에서 유기적으로 동작하게 만들려면 자바레이어(상위)와 C&#x2F;C++ 레이어(하위)를 상호 연결">
 <meta property="og:type" content="article">
 <meta property="og:title" content="[인사이드 안드로이드] 챕터 4 - JNI와 NDK(1)">
-<meta property="og:url" content="http://kxxxgs.github.io/chapter4/index.html">
+<meta property="og:url" content="http://rudtn082.github.io/chapter4/index.html">
 <meta property="og:site_name" content="kxxxgs">
 <meta property="og:description" content="[인사이드 안드로이드]Chapter4 - JNI와 NDK(1)안드로이드와 JNI안드로이드 프레임워크는 자바와 C&#x2F;C++ 기반 모듈이 계층별로 구성돼 있다. C&#x2F;C++ 레이어와 자바 레이어가 서로 상호 작용하면서 동작하고 있다.이처럼 프레임워크에서 유기적으로 동작하게 만들려면 자바레이어(상위)와 C&#x2F;C++ 레이어(하위)를 상호 연결">
 <meta property="og:locale" content="ko_KR">
-<meta property="og:image" content="http://kxxxgs.github.io/images/post/jni1.png">
-<meta property="og:image" content="http://kxxxgs.github.io/images/post/jni2.png">
-<meta property="og:image" content="http://kxxxgs.github.io/images/post/jni3.png">
-<meta property="og:image" content="http://kxxxgs.github.io/images/post/jni4.png">
+<meta property="og:image" content="http://rudtn082.github.io/images/post/jni1.png">
+<meta property="og:image" content="http://rudtn082.github.io/images/post/jni2.png">
+<meta property="og:image" content="http://rudtn082.github.io/images/post/jni3.png">
+<meta property="og:image" content="http://rudtn082.github.io/images/post/jni4.png">
 <meta property="article:published_time" content="2019-03-28T15:00:00.000Z">
 <meta property="article:modified_time" content="2023-07-06T15:45:52.830Z">
 <meta property="article:author" content="kxxxgs">
 <meta property="article:tag" content="Android">
 <meta property="article:tag" content="인사이드 안드로이드">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:image" content="http://kxxxgs.github.io/images/post/jni1.png">
+<meta name="twitter:image" content="http://rudtn082.github.io/images/post/jni1.png">
   
   
   
@@ -73,7 +73,7 @@
   <script id="fluid-configs">
     var Fluid = window.Fluid || {};
     Fluid.ctx = Object.assign({}, Fluid.ctx)
-    var CONFIG = {"hostname":"kxxxgs.github.io","root":"/","version":"1.9.5","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":false},"image_zoom":{"enable":false,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":{"measurement_id":null},"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false}},"search_path":"/local-search.xml","include_content_in_search":true};
+    var CONFIG = {"hostname":"rudtn082.github.io","root":"/","version":"1.9.5","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":false},"image_zoom":{"enable":false,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":{"measurement_id":null},"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false}},"search_path":"/local-search.xml","include_content_in_search":true};
 
     if (CONFIG.web_analytics.follow_dnt) {
       var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
