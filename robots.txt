@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: http://rudtn082.github.io/post-sitemap.xml
