@@ -9,8 +9,24 @@
 
 
     <url>
+        <loc>http://rudtn082.github.io/info17/</loc>
+        <lastmod>2023-07-17T11:49:28.818Z</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.6</priority>
+
+    </url>
+
+    <url>
+        <loc>http://rudtn082.github.io/info16/</loc>
+        <lastmod>2023-07-17T11:44:17.305Z</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.6</priority>
+
+    </url>
+
+    <url>
         <loc>http://rudtn082.github.io/info15/</loc>
-        <lastmod>2023-07-11T12:22:42.375Z</lastmod>
+        <lastmod>2023-07-13T14:10:08.991Z</lastmod>
         <changefreq>weekly</changefreq>
         <priority>0.6</priority>
 
