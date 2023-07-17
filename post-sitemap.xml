@@ -9,6 +9,14 @@
 
 
     <url>
+        <loc>http://rudtn082.github.io/event1/</loc>
+        <lastmod>2023-07-17T13:07:20.746Z</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.6</priority>
+
+    </url>
+
+    <url>
         <loc>http://rudtn082.github.io/music7/</loc>
         <lastmod>2023-07-17T12:37:33.169Z</lastmod>
         <changefreq>weekly</changefreq>
