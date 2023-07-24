@@ -16,16 +16,16 @@
   <meta name="author" content="kxxxgs">
   <meta name="keywords" content="">
   
-    <meta name="description" content="박경수              body {           background: #fff;           color: #000;           font-family: &#39;Nanum Gothic&#39;, sans-serif;           paddin">
+    <meta name="description" content="박경수              article {           position: fixed;           width: 100vw;           height: 100vh;           left: 0px;           top: 0px;">
 <meta property="og:type" content="website">
 <meta property="og:title" content="page.title">
 <meta property="og:url" content="http://rudtn082.github.io/app/resume.html">
 <meta property="og:site_name" content="kxxxgs">
-<meta property="og:description" content="박경수              body {           background: #fff;           color: #000;           font-family: &#39;Nanum Gothic&#39;, sans-serif;           paddin">
+<meta property="og:description" content="박경수              article {           position: fixed;           width: 100vw;           height: 100vh;           left: 0px;           top: 0px;">
 <meta property="og:locale" content="ko_KR">
 <meta property="og:image" content="http://rudtn082.github.io/app/images/img.jpg">
-<meta property="article:published_time" content="2023-07-09T03:12:23.132Z">
-<meta property="article:modified_time" content="2022-12-14T14:02:48.000Z">
+<meta property="article:published_time" content="2023-07-24T13:44:53.944Z">
+<meta property="article:modified_time" content="2023-07-24T13:44:53.944Z">
 <meta property="article:author" content="kxxxgs">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:image" content="http://rudtn082.github.io/app/images/img.jpg">
@@ -211,15 +211,23 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Nanum+Gothic:wght@400;700&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
      <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
     <title>박경수</title>
     <style>
-        body {
-          background: #fff;
+        article {
+          position: fixed;
+          width: 100vw;
+          height: 100vh;
+          left: 0px;
+          top: 0px;
+          background: #FFF;
+          z-index: 99999;
+          overflow: auto;
+        }
+        .resume { 
           color: #000;
           font-family: 'Nanum Gothic', sans-serif;
           padding: 70px 20px;
@@ -350,6 +358,8 @@
      </style>
      <script>
         $(document).ready(function(){
+          $('header').remove();
+
            var date1 = new Date();
            var date2 = new Date('2019', '11', '16');
 
@@ -363,7 +373,8 @@
         });
      </script>
 </head>
-<body>
+<article>
+  <div class="resume">
     <div class="item" style="text-align: center;">
         <img src="./images/img.jpg" srcset="/img/loading.gif" lazyload style="height: 190px; width: auto; margin: 0 30px;">
         <div class="innerItem" style="margin: 0 30px;">
@@ -431,6 +442,42 @@
         <span class="tit">PROJECT</span>
         <div class="innerItem2">
           <div class="dateDiv">
+            <span class="date">2023.04 ~ 2023.07</span>
+            <div class="periodDiv">
+              <span class="period">3개월</span>
+            </div>
+          </div>
+          <div class="contDiv">
+            <span class="cont">E-HR 시스템 구축</span>
+            <span class="contSub">목적 : 기존에 각각 시스템에 분산되어 있던 HR 관련 프로그램을 한 곳에 모아 사용자 편의성을 위한 신규 E-HR 시스템 구축</span>
+            <ul class="contUl">
+              <li>주요 업무 : 화면 설계, 퍼블리싱, 개발</li>
+              <li>1. 로그인, 메인, 위젯, 평가 관련 화면 설계</li>
+              <li>2. 전반적인 화면 퍼블리싱</li>
+              <li>3. 로그인, 메인, 위젯, 평가, 의료비 지원 관련 개발</li>
+            </ul>
+          </div>
+        </div>
+        <div class="innerItem2">
+          <div class="dateDiv">
+            <span class="date">2022.12 ~ 2023.02</span>
+            <div class="periodDiv">
+              <span class="period">2개월</span>
+            </div>
+          </div>
+          <div class="contDiv">
+            <span class="cont">2022 연말정산</span>
+            <span class="contSub">목적 : 2022 연말정산 지급명세서 제출을 위한 기 프로그램 로직 및 UI 수정 진행</span>
+            <ul class="contUl">
+              <li>주요 업무 : 개정 세법에 의한 프로그램 UI 및 로직 수정</li>
+              <li>1. 2021년 사용된 기존 연말정산 입력 프로그램 UI 수정</li>
+              <li>2. 개정된 세법에 의한 프로그램 로직 수정 반영</li>
+              <li>3. 개정된 지급명세서에 의한 지급명세서 로직 수정 반영 (의료비, 기부금, 근로소득 등)</li>
+            </ul>
+          </div>
+        </div>
+        <div class="innerItem2">
+          <div class="dateDiv">
             <span class="date">2022.05 ~ 2022.06</span>
             <div class="periodDiv">
               <span class="period">1개월</span>
@@ -472,7 +519,7 @@
           <div class="dateDiv">
             <span class="date">2021.06 ~ 2021.10</span>
             <div class="periodDiv">
-              <span class="period">5개월</span>
+              <span class="period">4개월</span>
             </div>
           </div>
           <div class="contDiv">
@@ -493,7 +540,7 @@
           <div class="dateDiv">
             <span class="date">2020.12 ~ 2021.04</span>
             <div class="periodDiv">
-              <span class="period">5개월</span>
+              <span class="period">4개월</span>
             </div>
           </div>
           <div class="contDiv">
@@ -577,7 +624,8 @@
           </div>
         </div>
     </div>
-</body>
+  </div>
+</article>
 </html>
 
   
